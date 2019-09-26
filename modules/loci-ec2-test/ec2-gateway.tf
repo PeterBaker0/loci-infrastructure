@@ -1,7 +1,7 @@
 resource "aws_instance" "test_loci_ec2" {
   ami           = "ami-075caa3491def750b"
   instance_type = "t2.micro"
-  subnet_id = "${aws_subnet.loci-subnet-public.id}"
+  subnet_id = "${var.loci-subnet-public.id}"
   key_name = "${aws_key_pair.ec2key.key_name}"
   vpc_security_group_ids = ["${aws_security_group.loci-ec2.id}"]
   tags = {
@@ -18,7 +18,7 @@ resource "aws_key_pair" "ec2key" {
 resource "aws_security_group" "loci-ec2" {
   name        = "loci_ec2"
   description = "loci_ec2 security group"
-  vpc_id = "${aws_vpc.loci-vpc.id}"
+  vpc_id = "${var.loci-vpc.id}"
 
   ingress {
     # TLS (change to whatever ports you need)
