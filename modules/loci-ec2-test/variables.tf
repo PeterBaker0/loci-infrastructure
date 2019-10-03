@@ -13,3 +13,7 @@ variable "cidr" {
 variable "ipv6_cidr" {
   description = "ipv6 cidr blocks for security"
 }
+
+output "ec2_address" {
+  value = aws_instance.test_loci_ec2.public_ip
+}

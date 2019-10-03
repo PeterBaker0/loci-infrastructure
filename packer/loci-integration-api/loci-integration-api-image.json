@@ -1,0 +1,23 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "ap-southeast-2",
+    "source_ami": "ami-03ed5bd63ba378bd8",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ami_name": "loci-integration-api-image {{timestamp}}"
+  }],
+  "provisioners": [
+      {
+          "type": "shell",
+          "script": "./prov.sh", 
+          "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'" 
+      }
+  ]
+}

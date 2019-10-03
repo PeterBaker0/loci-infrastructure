@@ -1,5 +1,17 @@
+data "aws_ami" "ec2-ami" {
+  owners           = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }  
+  filter {
+    name   = "name"
+    values = ["loci-integration-api-image*"]
+  }  
+  most_recent = true
+}
 resource "aws_instance" "test_loci_ec2" {
-  ami           = "ami-075caa3491def750b"
+  ami           = "${data.aws_ami.ec2-ami.id}" 
   instance_type = "t2.micro"
   subnet_id = "${var.loci-subnet-public.id}"
   key_name = "${aws_key_pair.ec2key.key_name}"
@@ -10,6 +22,9 @@ resource "aws_instance" "test_loci_ec2" {
     O2D     = "TBA"
     }
 }
+
+
+
 resource "aws_key_pair" "ec2key" {
   key_name = "publicKey"
   public_key = "${file(var.public_key_path)}"
@@ -33,6 +48,22 @@ resource "aws_security_group" "loci-ec2" {
     to_port     = 22 
     protocol    = "tcp"
     ipv6_cidr_blocks = "${var.ipv6_cidr}"
+  }
+  
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 80 
+    to_port     = 80 
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 80 
+    to_port     = 80 
+    protocol    = "tcp"
+    ipv6_cidr_blocks =["::/0"]
   }
 
   egress {
