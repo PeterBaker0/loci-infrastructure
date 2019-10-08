@@ -22,8 +22,10 @@ resource "aws_instance" "test_loci_ec2" {
     O2D     = "TBA"
     }
 }
-
-
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = "${aws_instance.test_loci_ec2.id}"
+  allocation_id = "${var.eip_allocation_id}"
+}
 
 resource "aws_key_pair" "ec2key" {
   key_name = "publicKey"
