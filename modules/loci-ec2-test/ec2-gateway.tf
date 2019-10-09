@@ -22,8 +22,10 @@ resource "aws_instance" "test_loci_ec2" {
     O2D     = "TBA"
     }
 }
-
-
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = "${aws_instance.test_loci_ec2.id}"
+  allocation_id = "${var.eip_allocation_id}"
+}
 
 resource "aws_key_pair" "ec2key" {
   key_name = "publicKey"
@@ -62,6 +64,22 @@ resource "aws_security_group" "loci-ec2" {
     # TLS (change to whatever ports you need)
     from_port   = 80 
     to_port     = 80 
+    protocol    = "tcp"
+    ipv6_cidr_blocks =["::/0"]
+  }
+  
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 443 
+    to_port     = 443 
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 443 
+    to_port     = 443 
     protocol    = "tcp"
     ipv6_cidr_blocks =["::/0"]
   }
