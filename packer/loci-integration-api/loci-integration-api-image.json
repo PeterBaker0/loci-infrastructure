@@ -15,9 +15,14 @@
   }],
   "provisioners": [
       {
-          "type": "shell",
-          "script": "./prov.sh", 
-          "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'" 
+        "type": "file",
+        "source": "instance.sh",
+        "destination": "/tmp/instance.sh"
+      },
+      {
+        "type": "shell",
+        "script": "./prov.sh", 
+        "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'" 
       }
   ]
 }
