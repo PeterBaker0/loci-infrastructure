@@ -1,3 +1,6 @@
+variable "loci-subnet-private" {
+  description = "private subnet"
+}
 variable "loci-subnet-public" {
   description = "public subnet"
 }

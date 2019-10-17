@@ -1,7 +1,7 @@
 
 resource "aws_network_acl" "sg_loci" {
   vpc_id = "${aws_vpc.loci-vpc.id}"
-  subnet_ids = ["${aws_subnet.loci-subnet-public.id}"]
+  subnet_ids = ["${aws_subnet.loci-subnet-public.id}", "aws_subnet.loci-subnet-private.id"]
 }
 resource "aws_network_acl_rule" "loci-test-acl-ingress" {
   network_acl_id = "${aws_network_acl.sg_loci.id}"
@@ -64,6 +64,17 @@ resource "aws_subnet" "loci-subnet-public" {
   availability_zone = "${var.availability_zone}"
   tags = {
     Name    = "loci test subnet"
+    Project = "Loci"
+    O2D     = "TBA"
+  }
+}
+
+resource "aws_subnet" "loci-subnet-private" {
+  vpc_id = "${aws_vpc.loci-vpc.id}"
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "${var.availability_zone}"
+  tags = {
+    Name    = "loci test private subnet"
     Project = "Loci"
     O2D     = "TBA"
   }
