@@ -12,13 +12,19 @@
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "ap-southeast-2",
     "source_ami": "ami-03ed5bd63ba378bd8",
-    "instance_type": "t2.micro",
+    "instance_type": "t2.large",
     "ssh_username": "ec2-user",
     "tags": { "purpose": "loci-integration-db-image {{timestamp}}" } ,
     "force_deregister" : true,
     "force_delete_snapshot" : true,
     "run_volume_tags": { "purpose": "run loci-integration-db-image {{timestamp}}" } ,
-    "ami_name": "loci-integration-db-image {{timestamp}}"
+    "ami_name": "loci-integration-db-image {{timestamp}}",
+    "launch_block_device_mappings": [{
+      "device_name": "/dev/xvda",
+      "delete_on_termination": true,
+      "volume_size": 250,
+      "volume_type": "gp2"
+    }]
   }],
   "provisioners": [
       {
