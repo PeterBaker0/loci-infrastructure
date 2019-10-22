@@ -7,6 +7,9 @@ variable "loci-subnet-public" {
 variable "loci-vpc" {
   description = "loci-vpc"
 }
+variable "private_key_path" {
+  description = "ec2 public key path"
+}
 variable "public_key_path" {
   description = "ec2 public key path"
 }
@@ -18,6 +21,9 @@ variable "ipv6_cidr" {
 }
 variable eip_allocation_id {
   description = "eip allocation id"
+}
+variable "public_ip" {
+  description = "public ip of api" 
 }
 output "ec2_address" {
   value = aws_instance.test_loci_ec2.public_ip

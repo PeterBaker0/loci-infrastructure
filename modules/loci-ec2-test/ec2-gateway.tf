@@ -1,10 +1,10 @@
-data "terraform_remote_state" "id" {
+data "terraform_remote_state" "certs" {
   backend = "remote"
 
   config = {
     organization = "loci"
     workspaces = {
-      name = "dev"
+      name = "dev-cert-store"
     }
   }
 }
@@ -35,7 +35,8 @@ data "aws_ami" "ec2-db-ami" {
 resource "aws_instance" "test_loci_ec2" {
   ami           = "${data.aws_ami.ec2-ami.id}" 
   instance_type = "m5.large"
-  availability_zone = "ap-southeast-2a"
+  availability_zone = "ap-southeast-2c"
+  associate_public_ip_address = true
   subnet_id = "${var.loci-subnet-public.id}"
   key_name = "${aws_key_pair.ec2key.key_name}"
   vpc_security_group_ids = ["${aws_security_group.loci-ec2.id}"]
@@ -48,25 +49,27 @@ resource "aws_instance" "test_loci_ec2" {
 
 resource "aws_volume_attachment" "loci_api_ebs_att" {
   device_name = "/dev/sdh"
-  volume_id   = "${data.terraform_remote_state.id}"
+  volume_id   = "${data.terraform_remote_state.certs.outputs.ebs_volume}"
   instance_id = "${aws_instance.test_loci_ec2.id}"
   provisioner "remote-exec" {
     connection {
-      host     = "${aws_instance.test_loci_ec2.public_ip}"
+      host     = "${var.public_ip}"
       type     = "ssh"
       user     = "ec2-user"
+      private_key = "${file(var.private_key_path)}"
     }
     inline = [
-      "mkfs -t ext4 /dev/sdh",
-      "mkdir /certs",
-      "mount /dev/sdh /certs"
+      "sudo yum install xfsprogs",
+      "if [ x`lsblk -ln -o FSTYPE /dev/sdh` != 'xext4' ] ; then sudo mkfs.ext4 /dev/sdh; fi",
+      "sudo mkdir /certs",
+      "sudo mount /dev/sdh /certs"
     ]
   }
 }
 
 resource "aws_instance" "test_loci_ec2-2" {
   ami           = "${data.aws_ami.ec2-db-ami.id}" 
-  availability_zone = "ap-southeast-2a"
+  availability_zone = "ap-southeast-2c"
   instance_type = "t2.large"
   subnet_id = "${var.loci-subnet-private.id}"
   private_ip = "10.0.1.200"

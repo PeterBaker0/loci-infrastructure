@@ -11,6 +11,9 @@ variable "availability_zone" {
   description = "availability zone to create subnet"
   default = "ap-southeast-2c"
 }
+variable "private_key_path" {
+  description = "private key path"
+}
 variable "public_key_path" {
   description = "Public key path"
   default = "~/.ssh/id_rsa.pub"
@@ -30,4 +33,7 @@ variable "instance_type" {
 variable "environment_tag" {
   description = "Environment tag"
   default = "Production"
+}
+variable "public_ip" {
+  description = "public api ip"
 }

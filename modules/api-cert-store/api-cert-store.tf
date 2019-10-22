@@ -1,5 +1,5 @@
 resource "aws_ebs_volume" "cert_store" {
-  availability_zone = "ap-southeast-2a"
+  availability_zone = "ap-southeast-2c"
   size              = 2 
   type              = "gp2"
   tags = {
