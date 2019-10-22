@@ -15,6 +15,10 @@ variable "public_key_path" {
   description = "Public key path"
   default = "~/.ssh/id_rsa.pub"
 }
+variable "aws_api_volume_id" {
+  description = "aws api volume for certs"
+  default = "" 
+}
 variable "instance_ami" {
   description = "AMI for aws EC2 instance"
   default = "ami-0cf31d971a3ca20d6"

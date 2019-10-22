@@ -1,7 +1,7 @@
 
 resource "aws_network_acl" "sg_loci" {
   vpc_id = "${aws_vpc.loci-vpc.id}"
-  subnet_ids = ["${aws_subnet.loci-subnet-public.id}", "aws_subnet.loci-subnet-private.id"]
+  subnet_ids = ["${aws_subnet.loci-subnet-public.id}", "${aws_subnet.loci-subnet-private.id}"]
 }
 resource "aws_network_acl_rule" "loci-test-acl-ingress" {
   network_acl_id = "${aws_network_acl.sg_loci.id}"
