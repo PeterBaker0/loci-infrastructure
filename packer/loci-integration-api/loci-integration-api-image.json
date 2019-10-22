@@ -15,7 +15,13 @@
     "tags": { "purpose": "loci-integration-api-image {{timestamp}}" } ,
     "run_volume_tags": { "purpose": "run loci-integration-api-image {{timestamp}}" } ,
     "ssh_username": "ec2-user",
-    "ami_name": "loci-integration-api-image {{timestamp}}"
+    "ami_name": "loci-integration-api-image {{timestamp}}",
+    "launch_block_device_mappings": [{
+      "device_name": "/dev/xvda",
+      "delete_on_termination": true,
+      "volume_size": 50,
+      "volume_type": "gp2"
+    }]
   }],
   "provisioners": [
       {
