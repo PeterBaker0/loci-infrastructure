@@ -2,9 +2,8 @@
   "variables": {
     "aws_access_key": "",
     "aws_secret_key": "",
-    "script_aws_access": "{{env `AWS_ACCESS_KEY_ID`}}",
-    "script_aws_secret_access": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-    "script_aws_session_token": "{{env `AWS_SESSION_TOKEN`}}"
+    "script_aws_access": "{{env `LOCI_S3_ACCESS_KEY_ID`}}",
+    "script_aws_secret_access": "{{env `LOCI_S3_SECRET_ACCESS_KEY`}}"
   },
   "builders": [{
     "type": "amazon-ebs",
@@ -14,10 +13,14 @@
     "source_ami": "ami-03ed5bd63ba378bd8",
     "instance_type": "t2.large",
     "ssh_username": "ec2-user",
-    "tags": { "purpose": "loci-integration-db-image {{timestamp}}" } ,
-    "force_deregister" : true,
-    "force_delete_snapshot" : true,
-    "run_volume_tags": { "purpose": "run loci-integration-db-image {{timestamp}}" } ,
+    "tags": {
+      "purpose": "loci-integration-db-image {{timestamp}}"
+    },
+    "force_deregister": true,
+    "force_delete_snapshot": true,
+    "run_volume_tags": {
+      "purpose": "run loci-integration-db-image {{timestamp}}"
+    },
     "ami_name": "loci-integration-db-image {{timestamp}}",
     "launch_block_device_mappings": [{
       "device_name": "/dev/xvda",
@@ -26,17 +29,16 @@
       "volume_type": "gp2"
     }]
   }],
-  "provisioners": [
-      {
-        "type": "file",
-        "source": "instance.sh",
-        "destination": "/tmp/instance.sh"
-      },
-      {
-        "type": "shell",
-        "script": "./prov.sh", 
-        "environment_vars" : ["LOCI_S3_ACCESS_KEY_ID={{user `script_aws_access`}}", "LOCI_S3_SECRET_ACCESS_KEY={{user `script_aws_secret_access`}}", "AWS_SESSION_TOKEN={{user `script_aws_session_token`}}"], 
-        "execute_command": "echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}" 
-      }
+  "provisioners": [{
+      "type": "file",
+      "source": "instance.sh",
+      "destination": "/tmp/instance.sh"
+    },
+    {
+      "type": "shell",
+      "script": "./prov.sh",
+      "environment_vars": ["LOCI_S3_ACCESS_KEY_ID={{user `script_aws_access`}}", "LOCI_S3_SECRET_ACCESS_KEY={{user `script_aws_secret_access`}}", "AWS_SESSION_TOKEN={{user `script_aws_session_token`}}"],
+      "execute_command": "echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}"
+    }
   ]
 }
