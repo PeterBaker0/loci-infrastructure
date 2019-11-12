@@ -8,6 +8,6 @@ systemctl enable docker
 systemctl start docker && sleep 5
 echo "vm.max_map_count=262144" >> /etc/sysctl.d/98-sysctl.conf
 usermod -a -G docker ec2-user
-git clone --single-branch --branch file_descriptors_fix  https://github.com/CSIRO-enviro-informatics/loci-integration-api.git 
+git clone --single-branch --branch prod https://github.com/CSIRO-enviro-informatics/loci-integration-api.git 
 mv /tmp/instance.sh  /var/lib/cloud/scripts/per-instance/instance.sh
 chmod +x /var/lib/cloud/scripts/per-instance/instance.sh
