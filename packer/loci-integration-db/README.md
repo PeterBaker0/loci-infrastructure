@@ -1,0 +1,1 @@
+requires S3 credentials as LOCI_S3_ACCESS_KEY_ID and LOCI_S3_SECRET_ACCESS_KEY defined
