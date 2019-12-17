@@ -8,6 +8,7 @@ data "terraform_remote_state" "certs" {
     }
   }
 }
+
 data "aws_ami" "ec2-ami" {
   owners = ["self"]
   filter {
@@ -20,6 +21,22 @@ data "aws_ami" "ec2-ami" {
   }
   most_recent = true
 }
+
+data "aws_ami" "ec2-gds-ami" {
+  owners = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+  filter {
+    name   = "name"
+    values = ["loci-geometry-data-service-image*"]
+  }
+  most_recent = true
+}
+
+
+
 data "aws_ami" "ec2-db-ami" {
   owners = ["self"]
   filter {
@@ -29,6 +46,19 @@ data "aws_ami" "ec2-db-ami" {
   filter {
     name   = "name"
     values = ["loci-integration-db-image*"]
+  }
+  most_recent = true
+}
+
+data "aws_ami" "ec2-gds-db-ami" {
+  owners = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+  filter {
+    name   = "name"
+    values = ["loci-geometry-data-service-db-image*"]
   }
   most_recent = true
 }
