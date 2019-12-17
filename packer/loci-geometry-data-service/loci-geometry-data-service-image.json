@@ -37,7 +37,11 @@
     {
       "type": "shell",
       "script": "./prov.sh",
-      "environment_vars": ["LOCI_S3_ACCESS_KEY_ID={{user `script_aws_access`}}", "LOCI_S3_SECRET_ACCESS_KEY={{user `script_aws_secret_access`}}", "AWS_SESSION_TOKEN={{user `script_aws_session_token`}}"],
+      "environment_vars": [ 
+                  "LOCI_S3_ACCESS_KEY_ID={{user `script_aws_access`}}", 
+                  "LOCI_S3_SECRET_ACCESS_KEY={{user `script_aws_secret_access`}}", 
+                  "AWS_SESSION_TOKEN={{user `script_aws_session_token`}}"
+       ],
       "execute_command": "echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}"
     }
   ]
