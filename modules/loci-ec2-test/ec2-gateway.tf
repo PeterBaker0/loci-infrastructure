@@ -133,7 +133,7 @@ resource "aws_instance" "test_loci_ec2-geometry-data-service-db" {
   availability_zone      = "ap-southeast-2c"
   instance_type          = "t2.large"
   subnet_id              = "${var.loci-subnet-private.id}"
-  private_ip             = "10.0.1.200"
+  private_ip             = "10.0.1.201"
   key_name               = "${aws_key_pair.ec2key.key_name}"
   vpc_security_group_ids = ["${aws_security_group.loci-ec2-private-db.id}"]
   tags = {
@@ -185,6 +185,21 @@ resource "aws_security_group" "loci-ec2-private-db" {
     # TLS (change to whatever ports you need)
     from_port   = 5437
     to_port     = 5437
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 25432
+    to_port     = 25432
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+  egress {
+    # TLS (change to whatever ports you need)
+    from_port   = 25432
+    to_port     = 25432
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
