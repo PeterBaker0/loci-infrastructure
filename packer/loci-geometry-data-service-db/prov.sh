@@ -11,5 +11,5 @@ git clone --single-branch --branch master https://github.com/CSIRO-enviro-inform
 mv /tmp/instance.sh  /var/lib/cloud/scripts/per-instance/instance.sh
 chmod +x /var/lib/cloud/scripts/per-instance/instance.sh
 printenv
-cd /home/ec2-user/loci-geometry-data-service/ && pwd && ls && docker-compose -f docker-compose.yml up -d db loader
+cd /home/ec2-user/loci-geometry-data-service/ && pwd && ls && docker-compose -f docker-compose.yml up -d db 
 

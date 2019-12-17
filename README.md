@@ -17,6 +17,8 @@ need keys for SSH in a home dir called ~/loci-keys
 
 Valid AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN need to be defined as environment variables (or via other terraform acceptable means)
 
+Go to `environments/main` to run the following:
+
 To run combinations of:
 ```
 terraform init 

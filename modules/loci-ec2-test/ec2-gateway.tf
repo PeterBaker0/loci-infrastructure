@@ -222,6 +222,14 @@ resource "aws_security_group" "loci-ec2" {
 
   ingress {
     # TLS (change to whatever ports you need)
+    from_port   = 25432
+    to_port     = 25432
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  ingress {
+    # TLS (change to whatever ports you need)
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -239,6 +247,13 @@ resource "aws_security_group" "loci-ec2" {
     # TLS (change to whatever ports you need)
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
