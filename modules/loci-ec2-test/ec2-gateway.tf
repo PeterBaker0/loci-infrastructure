@@ -79,7 +79,7 @@ resource "aws_instance" "test_loci_ec2" {
 }
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service" {
-  ami                         = "${data.aws_ami.ec2-ami.id}"
+  ami                         = "${data.aws_ami.ec2-gds-ami.id}"
   instance_type               = "m5.large"
   availability_zone           = "ap-southeast-2c"
   associate_public_ip_address = true
@@ -129,7 +129,7 @@ resource "aws_instance" "test_loci_ec2-2" {
 }
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service-db" {
-  ami                    = "${data.aws_ami.ec2-db-ami.id}"
+  ami                    = "${data.aws_ami.ec2-gds-db-ami.id}"
   availability_zone      = "ap-southeast-2c"
   instance_type          = "t2.large"
   subnet_id              = "${var.loci-subnet-private.id}"
