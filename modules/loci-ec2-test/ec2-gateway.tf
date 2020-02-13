@@ -37,19 +37,6 @@ data "aws_ami" "ec2-gds-ami" {
 
 
 
-data "aws_ami" "ec2-db-ami" {
-  owners = ["self"]
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-  filter {
-    name   = "name"
-    values = ["loci-integration-db-image*"]
-  }
-  most_recent = true
-}
-
 data "aws_ami" "ec2-gds-db-ami" {
   owners = ["self"]
   filter {
@@ -110,21 +97,6 @@ resource "aws_volume_attachment" "loci_api_ebs_att" {
       "sudo mkdir /certs",
       "sudo mount /dev/sdh /certs"
     ]
-  }
-}
-
-resource "aws_instance" "test_loci_ec2-2" {
-  ami                    = "${data.aws_ami.ec2-db-ami.id}"
-  availability_zone      = "ap-southeast-2c"
-  instance_type          = "t2.large"
-  subnet_id              = "${var.loci-subnet-private.id}"
-  private_ip             = "10.0.1.200"
-  key_name               = "${aws_key_pair.ec2key.key_name}"
-  vpc_security_group_ids = ["${aws_security_group.loci-ec2-private-db.id}"]
-  tags = {
-    Name    = "loci test db"
-    Project = "Loci"
-    O2D     = "TBA"
   }
 }
 
