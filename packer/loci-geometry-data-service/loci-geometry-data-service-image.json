@@ -35,6 +35,16 @@
       "destination": "/tmp/instance.sh"
     },
     {
+      "type": "file",
+      "source": "../certs/wildcard-loci-cat.pem",
+      "destination": "/tmp/wildcard-loci-cat.pem"
+    },
+    {
+      "type": "file",
+      "source": "../certs/wildcard-loci-cat.bundle.pem",
+      "destination": "/tmp/wildcard-loci-cat.bundle.pem"
+    },
+    {
       "type": "shell",
       "script": "./prov.sh",
       "environment_vars": [ 
