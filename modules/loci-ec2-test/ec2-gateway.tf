@@ -63,6 +63,11 @@ resource "aws_instance" "test_loci_ec2" {
     Project = "Loci"
     O2D     = "TBA"
   }
+  user_data = <<-EOF
+      #! /bin/bash 
+      sed -i '1 aexport TRIPLESTORE_CACHE_URL=${var.triplestore_cache_url}' /instance.sh
+      . /instance.sh
+    EOF
 }
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service" {
@@ -80,7 +85,7 @@ resource "aws_instance" "test_loci_ec2-geometry-data-service" {
   }
 }
 
-resource "aws_volume_attachment" "loci_api_ebs_att" {
+/*resource "aws_volume_attachment" "loci_api_ebs_att" {
   device_name = "/dev/sdh"
   volume_id   = "${data.terraform_remote_state.certs.outputs.ebs_volume}"
   instance_id = "${aws_instance.test_loci_ec2.id}"
@@ -98,7 +103,7 @@ resource "aws_volume_attachment" "loci_api_ebs_att" {
       "sudo mount /dev/sdh /certs"
     ]
   }
-}
+}*/
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service-db" {
   ami                    = "${data.aws_ami.ec2-gds-db-ami.id}"
@@ -121,7 +126,7 @@ resource "aws_eip_association" "eip_assoc" {
 }
 
 resource "aws_key_pair" "ec2key" {
-  key_name   = "publicKey"
+  key_name   = "publicKey${var.public_key_suffix}"
   public_key = "${file(var.public_key_path)}"
 }
 

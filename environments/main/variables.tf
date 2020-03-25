@@ -1,4 +1,12 @@
+variable "public_key_suffix" {
+  description = "public key suffix"
+  default = ""
+}
 
+variable "triplestore_cache_url" {
+  description = "Triple store cache url"
+  default = ""
+}
 variable "cidr_vpc" {
   description = "CIDR block for the VPC"
   default     = "10.0.0.0/16"
