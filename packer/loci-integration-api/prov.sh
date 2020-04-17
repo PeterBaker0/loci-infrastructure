@@ -9,8 +9,8 @@ systemctl start docker && sleep 5
 echo "vm.max_map_count=262144" >> /etc/sysctl.d/98-sysctl.conf
 usermod -a -G docker ec2-user
 git clone --single-branch --branch prod https://github.com/CSIRO-enviro-informatics/loci-integration-api.git 
-mv /tmp/instance.sh  /var/lib/cloud/scripts/per-instance/instance.sh
+mv /tmp/instance.sh  /instance.sh
 mv /tmp/wildcard-loci-cat.bundle.pem /home/ec2-user/loci-integration-api/certs/
 mv /tmp/wildcard-loci-cat.pem /home/ec2-user/loci-integration-api/certs/
 ls -la /home/ec2-user/loci-integration-api/certs/
-chmod +x /var/lib/cloud/scripts/per-instance/instance.sh
+chmod +x /instance.sh

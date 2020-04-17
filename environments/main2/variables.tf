@@ -2,7 +2,6 @@ variable "public_key_suffix" {
   description = "public key suffix"
   default = ""
 }
-
 variable "triplestore_cache_url" {
   description = "Triple store cache url"
   default = ""

@@ -1,3 +1,6 @@
+variable "public_key_suffix" {
+  description = "private subnet"
+}
 variable "loci-subnet-private" {
   description = "private subnet"
 }
@@ -24,6 +27,9 @@ variable eip_allocation_id {
 }
 variable "public_ip" {
   description = "public ip of api" 
+}
+variable triplestore_cache_url {
+  description = "triple store cache url"
 }
 output "ec2_address" {
   value = aws_instance.test_loci_ec2.public_ip

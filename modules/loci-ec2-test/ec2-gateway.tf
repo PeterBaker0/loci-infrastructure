@@ -35,6 +35,19 @@ data "aws_ami" "ec2-gds-ami" {
   most_recent = true
 }
 
+data "aws_ami" "ec2-locicorsproxy-ami" {
+  owners = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+  filter {
+    name   = "name"
+    values = ["loci-cors-proxy-image*"]
+  }
+  most_recent = true
+}
+
 
 
 data "aws_ami" "ec2-gds-db-ami" {
@@ -63,6 +76,11 @@ resource "aws_instance" "test_loci_ec2" {
     Project = "Loci"
     O2D     = "TBA"
   }
+  user_data = <<-EOF
+      #! /bin/bash 
+      sed -i '1 aexport TRIPLESTORE_CACHE_URL=${var.triplestore_cache_url}' /instance.sh
+      . /instance.sh
+    EOF
 }
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service" {
@@ -80,7 +98,22 @@ resource "aws_instance" "test_loci_ec2-geometry-data-service" {
   }
 }
 
-resource "aws_volume_attachment" "loci_api_ebs_att" {
+resource "aws_instance" "test_loci_ec2-cors-proxy" {
+  ami                         = "${data.aws_ami.ec2-locicorsproxy-ami.id}"
+  instance_type               = "t2.micro"
+  availability_zone           = "ap-southeast-2c"
+  associate_public_ip_address = true
+  subnet_id                   = "${var.loci-subnet-public.id}"
+  key_name                    = "${aws_key_pair.ec2key.key_name}"
+  vpc_security_group_ids      = ["${aws_security_group.loci-ec2.id}"]
+  tags = {
+    Name    = "loci test cors proxy"
+    Project = "Loci"
+    O2D     = "TBA"
+  }
+}
+
+/*resource "aws_volume_attachment" "loci_api_ebs_att" {
   device_name = "/dev/sdh"
   volume_id   = "${data.terraform_remote_state.certs.outputs.ebs_volume}"
   instance_id = "${aws_instance.test_loci_ec2.id}"
@@ -98,7 +131,7 @@ resource "aws_volume_attachment" "loci_api_ebs_att" {
       "sudo mount /dev/sdh /certs"
     ]
   }
-}
+}*/
 
 resource "aws_instance" "test_loci_ec2-geometry-data-service-db" {
   ami                    = "${data.aws_ami.ec2-gds-db-ami.id}"
@@ -121,7 +154,7 @@ resource "aws_eip_association" "eip_assoc" {
 }
 
 resource "aws_key_pair" "ec2key" {
-  key_name   = "publicKey"
+  key_name   = "publicKey${var.public_key_suffix}"
   public_key = "${file(var.public_key_path)}"
 }
 
