@@ -35,6 +35,19 @@ data "aws_ami" "ec2-gds-ami" {
   most_recent = true
 }
 
+data "aws_ami" "ec2-locicorsproxy-ami" {
+  owners = ["self"]
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+  filter {
+    name   = "name"
+    values = ["loci-cors-proxy-image*"]
+  }
+  most_recent = true
+}
+
 
 
 data "aws_ami" "ec2-gds-db-ami" {
@@ -80,6 +93,21 @@ resource "aws_instance" "test_loci_ec2-geometry-data-service" {
   vpc_security_group_ids      = ["${aws_security_group.loci-ec2.id}"]
   tags = {
     Name    = "loci test geometry-data-service api"
+    Project = "Loci"
+    O2D     = "TBA"
+  }
+}
+
+resource "aws_instance" "test_loci_ec2-cors-proxy" {
+  ami                         = "${data.aws_ami.ec2-locicorsproxy-ami.id}"
+  instance_type               = "t2.micro"
+  availability_zone           = "ap-southeast-2c"
+  associate_public_ip_address = true
+  subnet_id                   = "${var.loci-subnet-public.id}"
+  key_name                    = "${aws_key_pair.ec2key.key_name}"
+  vpc_security_group_ids      = ["${aws_security_group.loci-ec2.id}"]
+  tags = {
+    Name    = "loci test cors proxy"
     Project = "Loci"
     O2D     = "TBA"
   }
