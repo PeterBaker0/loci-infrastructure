@@ -34,3 +34,6 @@ variable triplestore_cache_url {
 output "ec2_address" {
   value = aws_instance.test_loci_ec2.public_ip
 }
+variable api_image_tag_suffix {
+  description = "suffix on the api image tag"
+}
