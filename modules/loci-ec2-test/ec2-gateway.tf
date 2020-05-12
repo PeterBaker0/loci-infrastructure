@@ -17,7 +17,7 @@ data "aws_ami" "ec2-ami" {
   }
   filter {
     name   = "name"
-    values = ["loci-integration-api-image*"]
+    values = ["loci-integration-api-image${var.api_image_tag_suffix} *"]
   }
   most_recent = true
 }

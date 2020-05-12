@@ -12,10 +12,10 @@
     "instance_type": "t2.micro",
     "force_deregister" : true,
     "force_delete_snapshot" : true,
-    "tags": { "purpose": "loci-integration-api-image {{timestamp}}" } ,
-    "run_volume_tags": { "purpose": "run loci-integration-api-image {{timestamp}}" } ,
+    "tags": { "purpose": "loci-integration-api-image-test {{timestamp}}" } ,
+    "run_volume_tags": { "purpose": "run loci-integration-api-image-test {{timestamp}}" } ,
     "ssh_username": "ec2-user",
-    "ami_name": "loci-integration-api-image {{timestamp}}",
+    "ami_name": "loci-integration-api-image-test {{timestamp}}",
     "launch_block_device_mappings": [{
       "device_name": "/dev/xvda",
       "delete_on_termination": true,
