@@ -12,10 +12,10 @@
     "instance_type": "t2.micro",
     "force_deregister" : true,
     "force_delete_snapshot" : true,
-    "tags": { "purpose": "loci-integration-api-image-test {{timestamp}}" } ,
-    "run_volume_tags": { "purpose": "run loci-integration-api-image-test {{timestamp}}" } ,
+    "tags": { "purpose": "loci-integration-api-image {{timestamp}}" } ,
+    "run_volume_tags": { "purpose": "run loci-integration-api-image {{timestamp}}" } ,
     "ssh_username": "ec2-user",
-    "ami_name": "loci-integration-api-image-test {{timestamp}}",
+    "ami_name": "loci-integration-api-image {{timestamp}}",
     "launch_block_device_mappings": [{
       "device_name": "/dev/xvda",
       "delete_on_termination": true,
@@ -38,6 +38,11 @@
          "type": "file",
          "source": "../certs/wildcard-loci-cat.bundle.pem",
          "destination": "/tmp/wildcard-loci-cat.bundle.pem"
+      },
+      {
+         "type": "file",
+         "source": "./envs/api_with_dggs_credentials.env",
+         "destination": "/tmp/api_with_dggs_credentials.env"
       },
       {
         "type": "shell",

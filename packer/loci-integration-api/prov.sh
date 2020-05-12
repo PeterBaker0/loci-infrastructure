@@ -12,5 +12,6 @@ git clone --single-branch --branch prod https://github.com/CSIRO-enviro-informat
 mv /tmp/instance.sh  /instance.sh
 mv /tmp/wildcard-loci-cat.bundle.pem /home/ec2-user/loci-integration-api/certs/
 mv /tmp/wildcard-loci-cat.pem /home/ec2-user/loci-integration-api/certs/
+[ -f /tmp/api_with_dggs_credentials.env ] && mv /tmp/api_with_dggs_credentials.env /home/ec2-user/loci-integration-api/.env
 ls -la /home/ec2-user/loci-integration-api/certs/
 chmod +x /instance.sh
