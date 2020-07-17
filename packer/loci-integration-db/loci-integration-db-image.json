@@ -10,7 +10,12 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "ap-southeast-2",
-    "source_ami": "ami-03ed5bd63ba378bd8",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "description": "Amazon Linux 2 AMI*x86_64*HVM*gp2",
+        "root-device-type": "ebs"
+      },
     "instance_type": "t2.large",
     "ssh_username": "ec2-user",
     "tags": {
