@@ -1,17 +1,17 @@
-# Update package repo
+# Update repos
 sudo yum update -y
 
-# Install docker
-sudo amazon-linux-extras install docker
+# Get docker
+sudo amazon-linux-extras install docker -y
 
-# Start service
+# Start docker
 sudo service docker start
 
-# Add the ec2-user user to docker group
+# Enable non sudo docker booting
 sudo usermod -a -G docker ec2-user
 
-# Let's also setup docker compose 
+# Get docker compose
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
-# And enable execution 
+# Make executable
 sudo chmod +x /usr/local/bin/docker-compose

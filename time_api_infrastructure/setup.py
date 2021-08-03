@@ -20,7 +20,8 @@ setuptools.setup(
 
     install_requires=[
         "aws-cdk.core==1.109.0",
-        "aws-cdk.aws-ec2"
+        "aws-cdk.aws-ec2",
+        "aws-cdk.aws-route53"
     ],
 
     python_requires=">=3.6",
