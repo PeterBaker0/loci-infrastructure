@@ -5,7 +5,12 @@ from aws_cdk import(
     aws_route53 as r53
 )
 
-from typing import List
+from typing import Optional
+
+DEFAULT_MACHINE_SPECS = ec2.InstanceType.of(
+    instance_class=ec2.InstanceClass.BURSTABLE3,
+    instance_size=ec2.InstanceSize.MEDIUM
+)
 
 
 def file_to_commands(file_path):
@@ -47,10 +52,15 @@ class APIInfrastructure(cdk.Construct):
                  construct_id: str,
                  vpc: ec2.Vpc,
                  instance_ip: str,
+                 machine_specs: Optional[ec2.InstanceType] = None,
                  **kwargs) -> None:
 
         # Super constructor
         super().__init__(scope, construct_id, **kwargs)
+
+        # Establish default machine specs
+        if not machine_specs:
+            machine_specs = DEFAULT_MACHINE_SPECS
 
         # Generate user data for injection into ec2 instance
         user_data = generate_user_data(logging=True)
@@ -60,10 +70,7 @@ class APIInfrastructure(cdk.Construct):
         api_instance = ec2.Instance(
             scope=self,
             id="api_ec2_instance",
-            instance_type=ec2.InstanceType.of(
-                instance_class=ec2.InstanceClass.BURSTABLE3,
-                instance_size=ec2.InstanceSize.MEDIUM
-            ),
+            instance_type=machine_specs,
             machine_image=ec2.MachineImage.latest_amazon_linux(
                 # use the Amazon Linux AMI v2
                 generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
@@ -76,6 +83,9 @@ class APIInfrastructure(cdk.Construct):
             user_data=user_data,
             user_data_causes_replacement=True
         )
+
+        # Expose for collecting variables
+        self.instance = api_instance
 
         # Setup access for SSM
         api_instance.role.add_managed_policy(
@@ -101,23 +111,3 @@ class APIInfrastructure(cdk.Construct):
         # ICMP
         api_instance.connections.allow_from_any_ipv4(
             ec2.Port.icmp_ping(), "Ping health checks.")
-
-        # Grab the public ip address of the EC2 instance
-        self.api_ip_output = cdk.CfnOutput(
-            self,
-            "api_pub_ip_output",
-            export_name="apiPublicAddress",
-            value=api_instance.instance_public_ip
-        )
-
-        # Export the SSM instance ID for debugging connection
-        self.api_instance_id = cdk.CfnOutput(
-            self,
-            "api_instance_id_output",
-            export_name="apiInstanceId",
-            value=api_instance.instance_id
-        )
-
-        # Export import entities
-        self.instance = api_instance
-        self.user_data = user_data

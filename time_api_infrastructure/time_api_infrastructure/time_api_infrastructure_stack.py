@@ -1,10 +1,11 @@
 from aws_cdk import(
     core as cdk,
-    aws_ec2 as ec2
+    aws_ec2 as ec2,
 )
 
-from time_api_infrastructure.constructs.vpc import ComputeVPC
+from time_api_infrastructure.vpc import ComputeVPC
 from time_api_infrastructure.api_infrastructure import APIInfrastructure
+from time_api_infrastructure.static_website import StaticWebsite
 
 
 class TimeApiInfrastructureStack(cdk.Stack):
@@ -41,3 +42,41 @@ class TimeApiInfrastructureStack(cdk.Stack):
             compute_vpc.vpc,
             "10.0.0.27"
         )
+        
+        # Create the static website hosting 
+        time_demo_website_name = "timedemo"
+        demo_website = StaticWebsite(
+            scope = self, 
+            construct_id = "time_demo_website",
+            website_name = time_demo_website_name
+        )
+
+        """
+        =======
+        OUTPUTS
+        =======
+        """
+        # Grab the public ip address of the EC2 instance
+        self.api_ip_output = cdk.CfnOutput(
+            self,
+            "api_pub_ip_output",
+            export_name="apiPublicAddress",
+            value=api_infrastructure.instance.instance_public_ip
+        )
+        
+        # can know where to send the files
+        self.bucket_name_output = cdk.CfnOutput(
+            scope = self, 
+            id = time_demo_website_name + "_bucket_name", 
+            value = demo_website.bucket.bucket_name,
+            export_name = time_demo_website_name + "-bucket-name"
+        )
+        
+        # Export the SSM instance ID for debugging connection
+        self.api_instance_id = cdk.CfnOutput(
+            self,
+            "api_instance_id_output",
+            export_name="apiInstanceId",
+            value=api_infrastructure.instance.instance_id
+        )
+        
