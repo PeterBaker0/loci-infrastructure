@@ -9,11 +9,16 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages: 
+- stage:
+name: 
+# Get AWS creds from Hashicorp Vault 
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+# Setup CDK environment by building AWS CLI and CDK 
+
+# Deploy using established environment and credentials 
+
+# Extract targets from the build outputs of the CDK build 
+
+# Download source from other github repo and deploy static website code to
+# bucket target
