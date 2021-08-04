@@ -2,6 +2,7 @@
 backup_bucket_name="loci-change-over-time-db-backup"
 file_name="backup.dump"
 backup_name="backup.dump"
+user_name="ubuntu"
 
 # Wait for access to apt-get 
 # https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
@@ -26,5 +27,5 @@ unzip awscliv2.zip
 sudo ./aws/install --update
 
 # No credentials file required (role environment variables)
-aws s3 cp --no-progress s3://"${backup_bucket_name}"/"${file_name}" "${backup_name}"
+aws s3 cp --no-progress s3://"${backup_bucket_name}"/"${file_name}" /home/"${user_name}"/"${backup_name}"
 

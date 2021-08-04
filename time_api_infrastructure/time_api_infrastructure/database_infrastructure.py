@@ -127,6 +127,13 @@ class DatabaseInfrastructure(cdk.Construct):
         # ICMP
         db_instance.connections.allow_from_any_ipv4(
             ec2.Port.icmp_ping(), "Ping health checks.")
+        
+        secret_generator = sm.SecretStringGenerator(
+                include_space=False, 
+                exclude_punctuation=True, 
+                password_length=30,
+                require_each_included_type=True
+        )
 
         # Let's create a database password and store it as a secret
         db_password_secret = sm.Secret(
@@ -134,7 +141,8 @@ class DatabaseInfrastructure(cdk.Construct):
             id = "db_password_secret", 
             description = "Password dynamically generated to enable access to the loci time demo DB.",
             removal_policy=cdk.RemovalPolicy.DESTROY,
-            secret_name=DATABASE_SECRET_NAME
+            secret_name=DATABASE_SECRET_NAME,
+            generate_secret_string=secret_generator
         )
         
         # We now have read access for the db instance, meaning its user 
