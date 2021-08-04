@@ -2,6 +2,7 @@ from aws_cdk import(
     core as cdk,
     aws_ec2 as ec2,
 )
+from database_infrastructure import DatabaseInfrastructure
 
 from time_api_infrastructure.vpc import ComputeVPC
 from time_api_infrastructure.api_infrastructure import APIInfrastructure
@@ -34,21 +35,29 @@ class TimeApiInfrastructureStack(cdk.Stack):
             cidr=cidr,
             subnets=subnets
         )
-        
-        # Create API infrastructure 
+
+        # Create API infrastructure
         api_infrastructure = APIInfrastructure(
-            self, 
+            self,
             "api_infrastructure",
             compute_vpc.vpc,
             "10.0.0.27"
         )
-        
-        # Create the static website hosting 
+
+        # Create DB infrastructure
+        db_infrastructure = DatabaseInfrastructure(
+            self,
+            "db_infrastructure",
+            compute_vpc.vpc,
+            "10.0.0.28"
+        )
+
+        # Create the static website hosting
         time_demo_website_name = "timedemo"
         demo_website = StaticWebsite(
-            scope = self, 
-            construct_id = "time_demo_website",
-            website_name = time_demo_website_name
+            scope=self,
+            construct_id="time_demo_website",
+            website_name=time_demo_website_name
         )
 
         """
@@ -56,22 +65,30 @@ class TimeApiInfrastructureStack(cdk.Stack):
         OUTPUTS
         =======
         """
-        # Grab the public ip address of the EC2 instance
+        # Grab the public ip address of the api EC2 instance
         self.api_ip_output = cdk.CfnOutput(
             self,
             "api_pub_ip_output",
             export_name="apiPublicAddress",
             value=api_infrastructure.instance.instance_public_ip
         )
-        
+
+        # Grab the public ip address of the db EC2 instance
+        self.db_ip_output = cdk.CfnOutput(
+            self,
+            "db_pub_ip_output",
+            export_name="dbPublicAddress",
+            value=db_infrastructure.instance.instance_public_ip
+        )
+
         # can know where to send the files
         self.bucket_name_output = cdk.CfnOutput(
-            scope = self, 
-            id = time_demo_website_name + "_bucket_name", 
-            value = demo_website.bucket.bucket_name,
-            export_name = time_demo_website_name + "-bucket-name"
+            scope=self,
+            id=time_demo_website_name + "_bucket_name",
+            value=demo_website.bucket.bucket_name,
+            export_name=time_demo_website_name + "-bucket-name"
         )
-        
+
         # Export the SSM instance ID for debugging connection
         self.api_instance_id = cdk.CfnOutput(
             self,
@@ -79,4 +96,3 @@ class TimeApiInfrastructureStack(cdk.Stack):
             export_name="apiInstanceId",
             value=api_infrastructure.instance.instance_id
         )
-        

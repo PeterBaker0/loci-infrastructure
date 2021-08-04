@@ -23,6 +23,7 @@ setuptools.setup(
         "aws-cdk.aws-ec2",
         "aws-cdk.aws-route53",
         "aws-cdk.aws-s3",
+        "aws-cdk.aws-secretsmanager"
     ],
 
     python_requires=">=3.6",
