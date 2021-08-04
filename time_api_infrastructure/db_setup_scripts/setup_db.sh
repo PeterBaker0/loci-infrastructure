@@ -45,7 +45,7 @@ unset db_password
 sudo su -c "createdb ${database_name}" - postgres
 
 # Restore the database to loci (this will take a while)
-sudo su -c "pg_restore -d ${database_name} /home/ubuntu/{backup_name}" - postgres
+sudo su -c "pg_restore -d ${database_name} /home/ubuntu/${backup_name}" - postgres
 
 # Stop the service for now - we are due for a restart
 sudo systemctl stop postgresql
