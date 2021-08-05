@@ -23,6 +23,7 @@ def generate_user_data(logging: bool = True):
     scripts = list(map(lambda x : prefix + x, [
         "setup_docker.sh",
         "setup_repo.sh",
+        "app_env.sh",
         "launch_service.sh"
     ]))
 
@@ -94,7 +95,7 @@ class APIInfrastructure(cdk.Construct):
         )
 
         # Establish an Elastic IP
-        app_eip = ec2.CfnEIP(
+        self.eip = ec2.CfnEIP(
             scope=self,
             id="apiEIP",
             instance_id=api_instance.instance_id

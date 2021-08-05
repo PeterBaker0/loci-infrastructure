@@ -7,7 +7,11 @@ from database_infrastructure import DatabaseInfrastructure
 from time_api_infrastructure.vpc import ComputeVPC
 from time_api_infrastructure.api_infrastructure import APIInfrastructure
 from time_api_infrastructure.static_website import StaticWebsite
+from time_api_infrastructure.dynamic_ip_mapping import DynamicIPMapping
 
+
+HOSTED_ZONE_NAME = "lab.loci.cat"
+HOSTED_ZONE_ID = "Z0038958343ZBGUYG08EO"
 
 class TimeApiInfrastructureStack(cdk.Stack):
 
@@ -50,6 +54,12 @@ class TimeApiInfrastructureStack(cdk.Stack):
             "db_infrastructure",
             compute_vpc.vpc,
             "10.0.0.28"
+        )
+
+        # Allow the db password secret to be read from the 
+        # api instance 
+        db_infrastructure.db_password_secret.grant_read(
+            api_infrastructure.instance.grant_principal
         )
 
         # Create the static website hosting
@@ -96,3 +106,38 @@ class TimeApiInfrastructureStack(cdk.Stack):
             export_name="apiInstanceId",
             value=api_infrastructure.instance.instance_id
         )
+       
+        """
+        ============
+        DNS MAPPINGS
+        ============
+        """
+        
+        # API 
+        api_prefix = "api."
+        full_api_address = api_prefix + HOSTED_ZONE_NAME
+        api_ip = api_infrastructure.instance.instance_public_ip
+        
+        DynamicIPMapping(
+            scope=self,
+            construct_id="api_ip_mapping",
+            hosted_zone_id=HOSTED_ZONE_ID,
+            zone_domain_name=HOSTED_ZONE_NAME,
+            full_domain_name=full_api_address,
+            ip=api_ip
+        )
+        
+        # DB
+        db_prefix = "db."
+        full_db_address = db_prefix + HOSTED_ZONE_NAME
+        db_ip = db_infrastructure.instance.instance_public_ip
+        
+        DynamicIPMapping(
+            scope=self,
+            construct_id="db_ip_mapping",
+            hosted_zone_id=HOSTED_ZONE_ID,
+            zone_domain_name=HOSTED_ZONE_NAME,
+            full_domain_name=full_db_address,
+            ip=db_ip
+        )
+        

@@ -24,7 +24,7 @@ def file_to_commands(file_path):
 def generate_user_data(logging: bool = True):
     # Configure user data
     prefix = "db_setup_scripts/"
-    scripts = list(map(lambda x : prefix + x, [
+    scripts = list(map(lambda x: prefix + x, [
         "retrieve_backup.sh",
         "db_password.sh",
         "setup_db.sh",
@@ -107,7 +107,7 @@ class DatabaseInfrastructure(cdk.Construct):
         backup_bucket.grant_read(db_instance.grant_principal)
 
         # Establish an Elastic IP
-        db_eip = ec2.CfnEIP(
+        self.eip = ec2.CfnEIP(
             scope=self,
             id="dbEIP",
             instance_id=db_instance.instance_id
@@ -127,24 +127,24 @@ class DatabaseInfrastructure(cdk.Construct):
         # ICMP
         db_instance.connections.allow_from_any_ipv4(
             ec2.Port.icmp_ping(), "Ping health checks.")
-        
+
         secret_generator = sm.SecretStringGenerator(
-                include_space=False, 
-                exclude_punctuation=True, 
-                password_length=30,
-                require_each_included_type=True
+            include_space=False,
+            exclude_punctuation=True,
+            password_length=30,
+            require_each_included_type=True
         )
 
         # Let's create a database password and store it as a secret
-        db_password_secret = sm.Secret(
-            scope = self,
-            id = "db_password_secret", 
-            description = "Password dynamically generated to enable access to the loci time demo DB.",
+        self.db_password_secret = sm.Secret(
+            scope=self,
+            id="db_password_secret",
+            description="Password dynamically generated to enable access to the loci time demo DB.",
             removal_policy=cdk.RemovalPolicy.DESTROY,
             secret_name=DATABASE_SECRET_NAME,
             generate_secret_string=secret_generator
         )
-        
-        # We now have read access for the db instance, meaning its user 
-        # data scripting can pull the secret and update the password 
-        db_password_secret.grant_read(db_instance.grant_principal)
+
+        # We now have read access for the db instance, meaning its user
+        # data scripting can pull the secret and update the password
+        self.db_password_secret.grant_read(db_instance.grant_principal)
