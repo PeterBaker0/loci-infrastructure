@@ -13,6 +13,7 @@ from time_api_infrastructure.dynamic_ip_mapping import DynamicIPMapping
 HOSTED_ZONE_NAME = "lab.loci.cat"
 HOSTED_ZONE_ID = "Z0038958343ZBGUYG08EO"
 
+
 class TimeApiInfrastructureStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
@@ -56,8 +57,8 @@ class TimeApiInfrastructureStack(cdk.Stack):
             "10.0.0.28"
         )
 
-        # Allow the db password secret to be read from the 
-        # api instance 
+        # Allow the db password secret to be read from the
+        # api instance
         db_infrastructure.db_password_secret.grant_read(
             api_infrastructure.instance.grant_principal
         )
@@ -106,38 +107,36 @@ class TimeApiInfrastructureStack(cdk.Stack):
             export_name="apiInstanceId",
             value=api_infrastructure.instance.instance_id
         )
-       
+
         """
         ============
         DNS MAPPINGS
         ============
         """
-        
-        # API 
-        api_prefix = "api."
-        full_api_address = api_prefix + HOSTED_ZONE_NAME
-        api_ip = api_infrastructure.instance.instance_public_ip
-        
-        DynamicIPMapping(
+        # Hosted zone - pull from pre-existing and update records
+        ip_map = DynamicIPMapping(
             scope=self,
-            construct_id="api_ip_mapping",
-            hosted_zone_id=HOSTED_ZONE_ID,
+            construct_id="time_demo_zone",
             zone_domain_name=HOSTED_ZONE_NAME,
-            full_domain_name=full_api_address,
-            ip=api_ip
+            hosted_zone_id=HOSTED_ZONE_ID
         )
-        
+
+        # API
+        api_prefix = "api."
+        api_eip = api_infrastructure.eip
+        ip_map.add_instance(
+            "api_ip_mapping",
+            api_prefix,
+            target_eip=api_eip,
+            comment="Time demo integration API host IP mapping."
+        )
+
         # DB
         db_prefix = "db."
-        full_db_address = db_prefix + HOSTED_ZONE_NAME
-        db_ip = db_infrastructure.instance.instance_public_ip
-        
-        DynamicIPMapping(
-            scope=self,
-            construct_id="db_ip_mapping",
-            hosted_zone_id=HOSTED_ZONE_ID,
-            zone_domain_name=HOSTED_ZONE_NAME,
-            full_domain_name=full_db_address,
-            ip=db_ip
+        db_eip = db_infrastructure.eip
+        ip_map.add_instance(
+            "db_ip_mapping",
+            db_prefix,
+            target_eip=db_eip,
+            comment="Time demo integration DB IP mapping."
         )
-        

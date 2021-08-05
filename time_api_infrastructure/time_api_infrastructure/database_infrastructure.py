@@ -113,10 +113,6 @@ class DatabaseInfrastructure(cdk.Construct):
             instance_id=db_instance.instance_id
         )
 
-        # Update the route53 record to reflect the elastic IP output
-        # zone=r53.
-        # r53.ARecord(self, ""
-
         # Security policies
         # TCP port 5432 for PG from everywhere
         db_instance.connections.allow_from(
