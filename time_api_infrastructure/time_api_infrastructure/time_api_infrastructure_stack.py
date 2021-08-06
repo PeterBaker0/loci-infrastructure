@@ -16,6 +16,7 @@ BASE_ADDRESS = "10.0.0.0"
 VPC_MASK = 24
 SUBNET_MASK = 24
 
+
 def construct_cidr(ip_base, mask):
     return f"{ip_base}/{mask}"
 
@@ -26,7 +27,7 @@ class TimeApiInfrastructureStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # CIDR for the VPC
-        cidr =  construct_cidr(BASE_ADDRESS, VPC_MASK)
+        cidr = construct_cidr(BASE_ADDRESS, VPC_MASK)
 
         # Setting up subnets
         # In our case all elements are publically exposed
@@ -72,10 +73,14 @@ class TimeApiInfrastructureStack(cdk.Stack):
         )
 
         # Create the static website hosting
-        time_demo_website_name = "timedemo"
+        # Website name must match the full domain name
+        # of the routing
+        # so we'll use timedemo. + zone name
+        time_demo_website_unqualified = "timedemo"
+        time_demo_website_name = f"{time_demo_website_unqualified}.{HOSTED_ZONE_NAME}"
         demo_website = StaticWebsite(
             scope=self,
-            construct_id="time_demo_website",
+            construct_id=time_demo_website_unqualified + "_website",
             website_name=time_demo_website_name
         )
 
@@ -105,7 +110,7 @@ class TimeApiInfrastructureStack(cdk.Stack):
             scope=self,
             id=time_demo_website_name + "_bucket_name",
             value=demo_website.bucket.bucket_name,
-            export_name=time_demo_website_name + "-bucket-name"
+            export_name="website-bucket-name"
         )
 
         # Export the SSM instance ID for debugging connection
@@ -147,4 +152,11 @@ class TimeApiInfrastructureStack(cdk.Stack):
             db_prefix,
             target_eip=db_eip,
             comment="Time demo integration DB IP mapping."
+        )
+
+        # Website mapping
+        ip_map.add_static_website(
+            id=time_demo_website_unqualified + "_ip_mapping",
+            unqualified_bucket_name=time_demo_website_unqualified,
+            comment="Mapping for static time demo website."
         )

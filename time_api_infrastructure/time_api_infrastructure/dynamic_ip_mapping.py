@@ -49,3 +49,28 @@ class DynamicIPMapping(cdk.Construct):
             # properly - no idea why this works?
             target=r53.RecordTarget.from_ip_addresses(target_eip.ref)
         )
+
+    def add_static_website(self,
+                           id: str,
+                           unqualified_bucket_name: str,
+                           comment: Optional[str] = None,
+                           route_ttl: Optional[str] = DEFAULT_TTL,
+                           region: Optional[str] = "ap-southeast-2"):
+        
+        # Work out the full qualified domain name
+        full_domain_target = f"{unqualified_bucket_name}.{self.zone_domain_name}.s3-website-{region}.amazonaws.com"
+        
+        # Name of the record (desired URL) must be the qualified bucket name
+        record_name = f"{unqualified_bucket_name}.{self.zone_domain_name}"
+        
+        # Create the record
+        record = r53.CnameRecord(
+            scope=self, 
+            id=id,
+            domain_name=full_domain_target,
+            record_name=record_name,
+            ttl=route_ttl,
+            zone=self.hz, 
+            comment=comment
+        ) 
+        
