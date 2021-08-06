@@ -11,8 +11,8 @@ Documented below is a deployment system for the LOCI Time-Demo API, the associat
 - Route53 mappings for the endpoints (documented below)
 
 ## Deployment Endpoints 
-- EC2 API [http://api.lab.loci.cat:8080]
-- EC2 DB (only receives comms from CSIRO VPNs and VPC traffic) [db.lab.loci.cat:5432]
+- EC2 API [http://api.lab.loci.cat:8080](http://api.lab.loci.cat:8080)
+- EC2 DB (only receives comms from CSIRO VPNs and VPC traffic) [db.lab.loci.cat:5432](db.lab.loci.cat:5432)
   - You can connect with psql -U postgres -p 5432 -h db.lab.loci.cat 
   - You will be prompted for the password which changes every deployment - retrieve it from AWS Secrets Manager
 - S3 Time Demo Integration APP [https://timedemo.lab.loci.cat]
