@@ -1,6 +1,8 @@
 # LOCI Time-Demo API + DB + Static Website Infrastructure
 Documented below is a deployment system for the LOCI Time-Demo API, the associated Postgis database serving data, as well as a website front end.
 
+A lot of the below information is subject to configuration settings in time_api_infrastructure/configuration.py. Please double check these defaults before deploying.
+
 ## Deployment components
 - VPC to host EC2 instances
 - Public subnet inside VPC

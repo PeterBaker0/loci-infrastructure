@@ -7,57 +7,31 @@ from aws_cdk import(
 )
 
 from typing import Optional
+from time_api_infrastructure.user_data_tooling import generate_user_data
 
+# If no other specs are provided, these will be
+# used
 DEFAULT_MACHINE_SPECS = ec2.InstanceType.of(
     instance_class=ec2.InstanceClass.BURSTABLE3,
     instance_size=ec2.InstanceSize.MEDIUM
 )
 
+# Specifies the locatino of the s3 bucket which holds
+# the backed up PG database contents. This could take a
+# while to restore on the instance if the data is moved
+# into cold storage (after 90 days.)
 BACKUP_ARN = "arn:aws:s3:::loci-change-over-time-db-backup"
+
+# This is the secret key for the password which will be
+# generated
 DATABASE_SECRET_NAME = "loci-time-demo-db-password"
-
-
-def file_to_commands(file_path):
-    return open(file_path, 'r').read().splitlines()
-
-
-def generate_user_data(logging: bool = True):
-    # Configure user data
-    prefix = "db_setup_scripts/"
-    scripts = list(map(lambda x: prefix + x, [
-        "retrieve_backup.sh",
-        "db_password.sh",
-        "setup_db.sh",
-        "launch_db.sh"
-    ]))
-
-    # We want to execute in bash
-    bang = "#!/bin/bash -xe"
-
-    # And log everything to /dev/console and /var/log/user-data.log
-    # from https://aws.amazon.com/premiumsupport/knowledge-center/ec2-linux-log-user-data/
-    logging_header = "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1"
-
-    # Generate a list of commands from combining setup files
-    combined = list(
-        map(lambda f: str(open(f, 'r').read()), scripts))
-    combined.insert(0, bang)
-
-    # Inject logging header if required
-    if logging:
-        combined.insert(1, logging_header)
-
-    data = "\n".join(combined)
-
-    # Return the created user data instance
-    return ec2.UserData.custom(data)
 
 
 class DatabaseInfrastructure(cdk.Construct):
     def __init__(self, scope: cdk.Construct,
                  construct_id: str,
                  vpc: ec2.Vpc,
-                 vpc_base_ip: str, 
+                 vpc_base_ip: str,
                  vpc_subnet_mask: str,
                  instance_ip: str,
                  machine_specs: Optional[ec2.InstanceType] = None,
@@ -71,7 +45,15 @@ class DatabaseInfrastructure(cdk.Construct):
             machine_specs = DEFAULT_MACHINE_SPECS
 
         # Generate user data for injection into ec2 instance
-        user_data = generate_user_data(logging=True)
+        # Configure user data
+        prefix = "db_setup_scripts/"
+        scripts = list(map(lambda x: prefix + x, [
+            "retrieve_backup.sh",
+            "db_password.sh",
+            "setup_db.sh",
+            "launch_db.sh"
+        ]))
+        user_data = generate_user_data(scripts, logging=True)
 
         # We now have a vpc and a subnet inside it, we can now create the instance
         # which will automatically create the EC2 and run appropriate scripting
@@ -116,7 +98,6 @@ class DatabaseInfrastructure(cdk.Construct):
         )
 
         # Security policies
-        # TCP port 5432 for PG from everywhere
 
         CSIRO_IP_CIDRS = [
             ("140.79.0.0", 16),
@@ -135,12 +116,12 @@ class DatabaseInfrastructure(cdk.Construct):
                 ec2.Peer.ipv4(str(ip) + "/" + str(mask)),
                 ec2.Port.tcp(PG_PORT)
             )
-            
-        # Enable traffic within subnet of VPC 
+
+        # Enable traffic within subnet of VPC
         db_instance.connections.allow_from(
             ec2.Peer.ipv4(f"{vpc_base_ip}/{vpc_subnet_mask}"),
             ec2.Port.tcp(PG_PORT)
-        ) 
+        )
 
         # ICMP
         db_instance.connections.allow_from_any_ipv4(

@@ -3,22 +3,11 @@ from aws_cdk import(
     aws_ec2 as ec2,
 )
 from database_infrastructure import DatabaseInfrastructure
-
 from time_api_infrastructure.vpc import ComputeVPC
 from time_api_infrastructure.api_infrastructure import APIInfrastructure
 from time_api_infrastructure.static_website import StaticWebsite
 from time_api_infrastructure.dynamic_ip_mapping import DynamicIPMapping
-
-
-HOSTED_ZONE_NAME = "lab.loci.cat"
-HOSTED_ZONE_ID = "Z0038958343ZBGUYG08EO"
-BASE_ADDRESS = "10.0.0.0"
-VPC_MASK = 24
-SUBNET_MASK = 24
-
-
-def construct_cidr(ip_base, mask):
-    return f"{ip_base}/{mask}"
+import configuration as CONFIG
 
 
 class TimeApiInfrastructureStack(cdk.Stack):
@@ -27,8 +16,7 @@ class TimeApiInfrastructureStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # CIDR for the VPC
-        cidr = construct_cidr(BASE_ADDRESS, VPC_MASK)
-
+        cidr = f"{CONFIG.BASE_ADDRESS}/{CONFIG.VPC_MASK}"
         # Setting up subnets
         # In our case all elements are publically exposed
         # and therefore we can have only a single public endpoint
@@ -61,8 +49,8 @@ class TimeApiInfrastructureStack(cdk.Stack):
             self,
             "db_infrastructure",
             compute_vpc.vpc,
-            BASE_ADDRESS,
-            SUBNET_MASK,
+            CONFIG.BASE_ADDRESS,
+            CONFIG.SUBNET_MASK,
             "10.0.0.28"
         )
 
@@ -76,11 +64,10 @@ class TimeApiInfrastructureStack(cdk.Stack):
         # Website name must match the full domain name
         # of the routing
         # so we'll use timedemo. + zone name
-        time_demo_website_unqualified = "timedemo"
-        time_demo_website_name = f"{time_demo_website_unqualified}.{HOSTED_ZONE_NAME}"
+        time_demo_website_name = f"{CONFIG.TIME_DEMO_BUCKET_SHORT_NAME}.{CONFIG.HOSTED_ZONE_NAME}"
         demo_website = StaticWebsite(
             scope=self,
-            construct_id=time_demo_website_unqualified + "_website",
+            construct_id=CONFIG.TIME_DEMO_BUCKET_SHORT_NAME + "_website",
             website_name=time_demo_website_name
         )
 
@@ -130,8 +117,8 @@ class TimeApiInfrastructureStack(cdk.Stack):
         ip_map = DynamicIPMapping(
             scope=self,
             construct_id="time_demo_zone",
-            zone_domain_name=HOSTED_ZONE_NAME,
-            hosted_zone_id=HOSTED_ZONE_ID
+            zone_domain_name=CONFIG.HOSTED_ZONE_NAME,
+            hosted_zone_id=CONFIG.HOSTED_ZONE_ID
         )
 
         # API
@@ -156,7 +143,7 @@ class TimeApiInfrastructureStack(cdk.Stack):
 
         # Website mapping
         ip_map.add_static_website(
-            id=time_demo_website_unqualified + "_ip_mapping",
-            unqualified_bucket_name=time_demo_website_unqualified,
+            id=CONFIG.TIME_DEMO_BUCKET_SHORT_NAME + "_ip_mapping",
+            unqualified_bucket_name=CONFIG.TIME_DEMO_BUCKET_SHORT_NAME,
             comment="Mapping for static time demo website."
         )
