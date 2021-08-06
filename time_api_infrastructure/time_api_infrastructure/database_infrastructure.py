@@ -57,6 +57,8 @@ class DatabaseInfrastructure(cdk.Construct):
     def __init__(self, scope: cdk.Construct,
                  construct_id: str,
                  vpc: ec2.Vpc,
+                 vpc_base_ip: str, 
+                 vpc_subnet_mask: str,
                  instance_ip: str,
                  machine_specs: Optional[ec2.InstanceType] = None,
                  **kwargs) -> None:
@@ -115,10 +117,30 @@ class DatabaseInfrastructure(cdk.Construct):
 
         # Security policies
         # TCP port 5432 for PG from everywhere
+
+        CSIRO_IP_CIDRS = [
+            ("140.79.0.0", 16),
+            ("130.155.0.0", 16),
+            ("152.83.0.0", 16),
+            ("138.194.0.0", 16),
+            ("140.253.0.0", 16),
+            ("144.110.0.0", 16),
+            ("130.116.0.0", 16)
+        ]
+
+        # Enable TCP on 5432 for CSIRO IP addresses
+        PG_PORT = 5432
+        for ip, mask in CSIRO_IP_CIDRS:
+            db_instance.connections.allow_from(
+                ec2.Peer.ipv4(str(ip) + "/" + str(mask)),
+                ec2.Port.tcp(PG_PORT)
+            )
+            
+        # Enable traffic within subnet of VPC 
         db_instance.connections.allow_from(
-            ec2.Peer.ipv4("0.0.0.0/0"),
-            ec2.Port.tcp(5432)
-        )
+            ec2.Peer.ipv4(f"{vpc_base_ip}/{vpc_subnet_mask}"),
+            ec2.Port.tcp(PG_PORT)
+        ) 
 
         # ICMP
         db_instance.connections.allow_from_any_ipv4(

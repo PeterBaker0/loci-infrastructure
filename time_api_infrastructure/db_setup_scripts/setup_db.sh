@@ -1,17 +1,19 @@
 # Some variables 
 database_name="loci"
 
-# Wait for access to apt-get 
-# https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
-while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do 
-	sleep 1;
+# Update package repo
+until sudo apt-get update -y
+do
+	echo "Waiting for apt-get lock.";
+	sleep 2;
 done
 
-# Update apt-repository 
-sudo apt-get update -y
-
 # Install postgres requirements 
-sudo apt-get install postgresql-12-postgis-3 postgresql-12-postgis-3-scripts -y
+until sudo apt-get install postgresql-12-postgis-3 postgresql-12-postgis-3-scripts -y
+do
+	echo "Waiting for apt-get lock.";
+	sleep 2;
+done
 
 # Update security 
 # Enable authentication to all dbs with password

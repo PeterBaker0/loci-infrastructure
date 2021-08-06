@@ -12,6 +12,12 @@ from time_api_infrastructure.dynamic_ip_mapping import DynamicIPMapping
 
 HOSTED_ZONE_NAME = "lab.loci.cat"
 HOSTED_ZONE_ID = "Z0038958343ZBGUYG08EO"
+BASE_ADDRESS = "10.0.0.0"
+VPC_MASK = 24
+SUBNET_MASK = 24
+
+def construct_cidr(ip_base, mask):
+    return f"{ip_base}/{mask}"
 
 
 class TimeApiInfrastructureStack(cdk.Stack):
@@ -20,7 +26,7 @@ class TimeApiInfrastructureStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # CIDR for the VPC
-        cidr = "10.0.0.0/24"
+        cidr =  construct_cidr(BASE_ADDRESS, VPC_MASK)
 
         # Setting up subnets
         # In our case all elements are publically exposed
@@ -54,6 +60,8 @@ class TimeApiInfrastructureStack(cdk.Stack):
             self,
             "db_infrastructure",
             compute_vpc.vpc,
+            BASE_ADDRESS,
+            SUBNET_MASK,
             "10.0.0.28"
         )
 

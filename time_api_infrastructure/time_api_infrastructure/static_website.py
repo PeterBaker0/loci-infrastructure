@@ -27,3 +27,5 @@ class StaticWebsite(cdk.Construct):
             removal_policy=cdk.RemovalPolicy.DESTROY,
             auto_delete_objects=True
         )
+        
+        # Let's 

@@ -9,3 +9,10 @@ __pycache__
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Some local build assist tools 
+./action.sh 
+./reconstruct.sh 
+./deploy.sh
+./cdkdiff.sh 
+

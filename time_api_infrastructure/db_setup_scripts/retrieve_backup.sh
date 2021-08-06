@@ -4,17 +4,18 @@ file_name="backup.dump"
 backup_name="backup.dump"
 user_name="ubuntu"
 
-# Wait for access to apt-get 
-# https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
-while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do 
-	sleep 1;
+# Update apt-get 
+until sudo apt-get update -y
+do
+	echo "Waiting for apt-get lock.";
+	sleep 2;
 done
 
-# Update apt-get 
-sudo apt-get update -y
-
-# Get unzip and jq
-sudo apt-get install unzip jq -y
+until sudo apt-get install unzip jq -y
+do
+	echo "Waiting for apt-get lock.";
+	sleep 2;
+done
 
 # Get the aws-cli v2
 # From https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
