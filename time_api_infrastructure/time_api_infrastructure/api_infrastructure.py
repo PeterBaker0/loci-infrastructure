@@ -6,6 +6,7 @@ from aws_cdk import(
 
 from typing import Optional
 from time_api_infrastructure.user_data_tooling import generate_user_data
+from time_api_infrastructure.configuration import API_PORT
 
 # If no other specs are provided, these will be
 # used
@@ -90,7 +91,7 @@ class APIInfrastructure(cdk.Construct):
         # Security policies
         # HTTP
         api_instance.connections.allow_from_any_ipv4(
-            ec2.Port.tcp(8080), "App HTTP traffic.")
+            ec2.Port.tcp(API_PORT), f"App HTTP traffic on port {API_PORT}.")
         # ICMP
         api_instance.connections.allow_from_any_ipv4(
             ec2.Port.icmp_ping(), "Ping health checks.")

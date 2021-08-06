@@ -13,7 +13,7 @@ A lot of the below information is subject to configuration settings in time_api_
 - Route53 mappings for the endpoints (documented below)
 
 ## Deployment Endpoints 
-- EC2 API [http://api.lab.loci.cat:8080](http://api.lab.loci.cat:8080)
+- EC2 API [http://api.lab.loci.cat](http://api.lab.loci.cat)
 - EC2 DB (only receives comms from CSIRO VPNs and VPC traffic) [db.lab.loci.cat:5432](db.lab.loci.cat:5432)
   - You can connect with psql -U postgres -p 5432 -h db.lab.loci.cat 
   - You will be prompted for the password which changes every deployment - retrieve it from AWS Secrets Manager

@@ -22,3 +22,7 @@ export TEMPORAL_PG_HOST="${database_vpc_ip}"
 export TEMPORAL_PG_PORT="5432"
 export TEMPORAL_PG_DB_NAME="loci"
 export TEMPORAL_PG_USER="postgres"
+
+# Make the docker compose export port 80 
+# which is mapped to 8080 on the application side
+export PORT="80"

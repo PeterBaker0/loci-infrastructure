@@ -42,6 +42,15 @@ TIME_DEMO_BUCKET_SHORT_NAME = os.environ.get(
     "timedemo"
 )
 
+# API Application Port - Needs to match that configured in
+# the build scripts for the loci-integration-api/timeworks 
+# build scripts 
+# CURRENTLY FIXED AS 80 in api_setup_scripts/app_env 
+API_PORT = os.environ.get(
+    "API_PORT",
+    80 # standard HTTP port
+)
+
 """
 ================
 FIXED PARAMETERS
