@@ -108,14 +108,14 @@ stages:
   # Get the git tag which triggered build
   - stage: retrieveGitTag
     displayName: Retrieve Git Tag
-    jobs: 
-      - job: retrieveTag 
+    jobs:
+      - job: retrieveTag
         pool:
           vmImage: "ubuntu-latest"
         steps:
           - task: Bash@3
             name: gitDescribeTask
-            displayName: Retrieve Git Tag 
+            displayName: Retrieve Git Tag
             inputs:
               targetType: inline
                 tag=$(git describe --exact-match $(BUILD.SourceVersion))
@@ -124,7 +124,7 @@ stages:
   # Deploy CDK Application
   - stage: deployAPIInfrastructure
     displayName: Deploy API Infrastructure
-    condition: and(succeeded(), contains(stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'],'BUILD'))
+    condition: and(succeeded(), startsWith(stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'],'BUILD'))
     jobs:
       - job: deployApp
         variables:
@@ -217,7 +217,7 @@ stages:
   # Destroy CDK Application
   - stage: destroyAPIInfrastructure
     displayName: Tear Down API Infrastructure
-    condition: and(succeeded(), contains(stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'],'DESTROY'))
+    condition: and(succeeded(), startsWith(stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'],'DESTROY'))
     jobs:
       - job: destroyApp
         variables:
