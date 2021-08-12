@@ -108,16 +108,17 @@ stages:
   # Get the git tag which triggered build
   - stage: retrieveGitTag
     displayName: Retrieve Git Tag
-    jobs: 
-      - job: retrieveTag 
+    jobs:
+      - job: retrieveTag
         pool:
           vmImage: "ubuntu-latest"
         steps:
           - task: Bash@3
             name: gitDescribeTask
-            displayName: Retrieve Git Tag 
+            displayName: Retrieve Git Tag
             inputs:
               targetType: inline
+              script: |
                 echo "tag=$(git describe --exact-match $(BUILD.SourceVersion))"
                 tag=$(git describe --exact-match $(BUILD.SourceVersion))
                 echo "##vso[task.setvariable variable=gitTag;isOutput=true]$tag"
