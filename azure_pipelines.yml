@@ -112,7 +112,7 @@ stages:
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
-          awsSessionToken: $[ dependencies.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
+          awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -152,7 +152,7 @@ stages:
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
-          awsSessionToken: $[ dependencies.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
+          awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
           appRepo: https://github.com/CSIRO-enviro-informatics/loci-integration-app
           appBranch: timedemo
           repoName: loci-integration-app
