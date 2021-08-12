@@ -18,7 +18,9 @@ stages:
               targetType: inline
               script: |
                 echo Downloading Vault archive and checksum
-                curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
+                VAULT_DOWNLOAD_ADDRESS="https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
+                echo "Downloading from: ${VAULT_DOWNLOAD_ADDRESS} with version ${VAULT_VERSION}."
+                curl -fsSL  ${VAULT_DOWNLOAD_ADDRESS}\
                   -o ./vault_${VAULT_VERSION}_linux_amd64.zip
                 REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS \
                   | grep vault_${VAULT_VERSION}_linux_amd64.zip)
