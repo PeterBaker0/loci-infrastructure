@@ -3,9 +3,18 @@ name: LOCI Time Demo API Pipeline
 trigger:
   - time_api_deployment
 
+# Variables from Pipeline
+#APP_NAME
+#AWS_ID
+#O2D_NUMBER
+#ROLE_ID (Secret)
+#SECRET_ID (Secret)
+#USER_ROLE_NAME
+#VAULT_ADDR
+
 stages:
-  - stage: Deploy_API_Infrastructure
-    displayName: Deploy API Infrastructure
+  - stage: Retrieve_AWS_Creds
+    displayName: Retrieve AWS Credentials
     jobs:
       # Get AWS creds from Hashicorp Vault
       - job: processVault
@@ -74,7 +83,6 @@ stages:
         displayName: DEBUG - Test AWS credentials retrieved from Vault
         dependsOn:
           - processVault
-        #condition: ${{ parameters.debugRun }}
         variables:
           awsAccessKeyId: $[ dependencies.processVault.outputs['generateAWScreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ dependencies.processVault.outputs['generateAWScreds.awsSecretAccessKey'] ]
@@ -96,53 +104,50 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
-# Setup CDK environment by building AWS CLI and CDK
+  - stage: Deploy_API_Infrastructure
+    displayName: Deploy API Infrastructure
 
-# Deploy using established environment and credentials
-
-# Extract targets from the build outputs of the CDK build
-
-# Download source from other github repo and deploy static website code to
-# bucket target
-#- job: revokeVaultLease
-#        condition: always() # this job will always run, even if the pipeline is canceled
-#        displayName: Revoke the AWS credentials Vault lease
-#        dependsOn:
-#          - processVault
-#          - processTerraform
-#        variables:
-#          VAULT_TOKEN: $[ dependencies.processVault.outputs['generateAWScreds.vaultToken'] ]
-#          VAULT_AWS_LEASE_ID: $[ dependencies.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
-#        steps:
-#          - task: Bash@3
-#            name: vaultClientInstaller
-#            displayName: Vault client installer
-#            inputs:
-#              targetType: inline
-#              script: |
-#                curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_linux_amd64.zip \
-#                  -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
-#                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_SHA256SUMS \
-#                  | grep vault_$(VAULT_VERSION)_linux_amd64.zip)
-#                LOCAL_SHA=$(sha256sum vault_$(VAULT_VERSION)_linux_amd64.zip)
-#                echo "Remote file SHA is: $REMOTE_SHA"
-#                echo "Local file SHA is: $LOCAL_SHA"
-#                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
-#                then
-#                  unzip -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
-#                  chmod +x ./vault
-#                else
-#                  echo "##[error] Checksums do not match!"
-#                  exit 1
-#                fi
-#          - task: Bash@3
-#            name: revokeVaultLeases
-#            displayName: Revoke Vault leases
-#            continueOnError: true # lease has a limited TTL so will eventually expire
-#            inputs:
-#              targetType: inline
-#              script: |
-#                echo 'login to vault'
-#                ./vault login -no-print $(VAULT_TOKEN)
-#                echo 'revoke lease'
-#                ./vault lease revoke $(VAULT_AWS_LEASE_ID)
+  - stage: Clean_Up_Credentials_Lease
+    displayName: Clean Up Credentials Lease
+    jobs:
+      - job: revokeVaultLease
+        condition: always() # this job will always run, even if the pipeline is canceled
+        displayName: Revoke the AWS credentials Vault lease
+        dependsOn:
+          - processVault
+        variables:
+          VAULT_TOKEN: $[ dependencies.processVault.outputs['generateAWScreds.vaultToken'] ]
+          VAULT_AWS_LEASE_ID: $[ dependencies.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
+        steps:
+          - task: Bash@3
+            name: vaultClientInstaller
+            displayName: Vault client installer
+            inputs:
+              targetType: inline
+              script: |
+                curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
+                  -o ./vault_${VAULT_VERSION}_linux_amd64.zip
+                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS \
+                  | grep vault_${VAULT_VERSION}_linux_amd64.zip)
+                LOCAL_SHA=$(sha256sum vault_${VAULT_VERSION}_linux_amd64.zip)
+                echo "Remote file SHA is: $REMOTE_SHA"
+                echo "Local file SHA is: $LOCAL_SHA"
+                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
+                then
+                  unzip -o ./vault_${VAULT_VERSION}_linux_amd64.zip
+                  chmod +x ./vault
+                else
+                  echo "##[error] Checksums do not match!"
+                  exit 1
+                fi
+          - task: Bash@3
+            name: revokeVaultLeases
+            displayName: Revoke Vault leases
+            continueOnError: true # lease has a limited TTL so will eventually expire
+            inputs:
+              targetType: inline
+              script: |
+                echo 'login to vault'
+                ./vault login -no-print $(VAULT_TOKEN)
+                echo 'revoke lease'
+                ./vault lease revoke $(VAULT_AWS_LEASE_ID)
