@@ -72,7 +72,7 @@ stages:
         displayName: DEBUG - Test AWS credentials retrieved from Vault
         dependsOn:
           - processVault
-        condition: ${{ parameters.debugRun }}
+        #condition: ${{ parameters.debugRun }}
         variables:
           awsAccessKeyId: $[ dependencies.processVault.outputs['generateAWScreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ dependencies.processVault.outputs['generateAWScreds.awsSecretAccessKey'] ]
