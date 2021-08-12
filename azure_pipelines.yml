@@ -182,11 +182,6 @@ stages:
               echo "Build website"
               yarn build
 
-              echo "Installing AWS CLI v2"
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install --update
-
               echo "Deploying to s3 bucket ${websiteBucketName}"
               echo "aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read"
               aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
