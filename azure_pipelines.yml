@@ -190,7 +190,7 @@ stages:
           - script: | 
               echo "Deploying to s3 bucket ${websiteBucketName}"
               cd ${{ variables.repoName }}
-              yarn deploy
+              aws s3 sync build/ s3://${{ variables.websiteBucketName }} --acl public-read
             displayName: Deploying to s3 bucket
             env:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
