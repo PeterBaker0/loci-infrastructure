@@ -13,7 +13,7 @@ trigger:
 #VAULT_ADDR
 
 stages:
-  - stage: RetrieveAWSCreds
+  - stage: retrieveAWSCreds
     displayName: Retrieve AWS Credentials
     jobs:
       # Get AWS creds from Hashicorp Vault
@@ -45,7 +45,7 @@ stages:
                   exit 1
                 fi
           - task: Bash@3
-            name: generateAWScreds
+            name: generateAWSCreds
             displayName: Generate AWS cross-account credentials
             inputs:
               targetType: inline
@@ -84,9 +84,9 @@ stages:
         dependsOn:
           - processVault
         variables:
-          awsAccessKeyId: $[ dependencies.processVault.outputs['generateAWScreds.awsAccessKeyId'] ]
-          awsSecretAccessKey: $[ dependencies.processVault.outputs['generateAWScreds.awsSecretAccessKey'] ]
-          awsSessionToken: $[ dependencies.processVault.outputs['generateAWScreds.awsSessionToken'] ]
+          awsAccessKeyId: $[ dependencies.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
+          awsSecretAccessKey: $[ dependencies.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
+          awsSessionToken: $[ dependencies.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
         steps:
           - task: Bash@3
             name: testAWScredsPass
@@ -107,15 +107,15 @@ stages:
   #  - stage: DeployAPIInfrastructure
   #    displayName: Deploy API Infrastructure
 
-  - stage: CleanUpCredentialsLease
+  - stage: cleanUpCredentialsLease
     displayName: Clean Up Credentials Lease
     jobs:
       - job: revokeVaultLease
         condition: always() # this job will always run, even if the pipeline is canceled
         displayName: Revoke the AWS credentials Vault lease
         variables:
-          VAULT_TOKEN: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWScreds.vaultToken'] ]
-          VAULT_AWS_LEASE_ID: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
+          VAULT_TOKEN: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultToken'] ]
+          VAULT_AWS_LEASE_ID: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultAwsLeaseId'] ]
         steps:
           - task: Bash@3
             name: vaultClientInstaller
