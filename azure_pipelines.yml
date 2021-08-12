@@ -5,7 +5,8 @@ trigger:
     include:
       - time_api_deployment
   tags:
-    - BUILD
+    include:
+      - BUILD
 
 # Variables from Pipeline
 #AWS_ID
