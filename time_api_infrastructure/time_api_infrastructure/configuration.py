@@ -51,6 +51,7 @@ API_PORT = os.environ.get(
     80 # standard HTTP port
 )
 
+
 """
 ================
 FIXED PARAMETERS
@@ -67,4 +68,5 @@ BASE_ADDRESS = "10.0.0.0"
 # currently fixed at the most restrictive.
 VPC_MASK = 24
 SUBNET_MASK = 24
+DB_MACHINE_IMAGE_NAME = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210223"
 

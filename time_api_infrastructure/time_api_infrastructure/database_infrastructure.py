@@ -8,6 +8,7 @@ from aws_cdk import(
 
 from typing import Optional
 from time_api_infrastructure.user_data_tooling import generate_user_data
+from time_api_infrastructure.configuration import DB_MACHINE_IMAGE_NAME
 
 # If no other specs are provided, these will be
 # used
@@ -62,7 +63,7 @@ class DatabaseInfrastructure(cdk.Construct):
             id="db_ec2_instance",
             instance_type=machine_specs,
             machine_image=ec2.MachineImage.lookup(
-                name="ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210223"
+                name=DB_MACHINE_IMAGE_NAME
             ),
             vpc=vpc,
             instance_name="time_demo_db",
