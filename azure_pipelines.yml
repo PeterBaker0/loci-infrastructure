@@ -119,9 +119,10 @@ stages:
             inputs:
               targetType: inline
               script: |
-                echo "tag=$(git describe --exact-match $(BUILD.SourceVersion))"
-                tag=$(git describe --exact-match $(BUILD.SourceVersion))
-                echo "##vso[task.setvariable variable=gitTag;isOutput=true]$tag"
+                tags=$(git tag --sort=-creatordate)
+                current_tag=$tags[0]
+                echo "Current tag: ${current_tag}"
+                echo "##vso[task.setvariable variable=gitTag;isOutput=true]$current_tag"
 
   # Deploy CDK Application
   - stage: deployAPIInfrastructure
