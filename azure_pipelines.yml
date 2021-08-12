@@ -4,7 +4,6 @@ trigger:
   - time_api_deployment
 
 # Variables from Pipeline
-#APP_NAME
 #AWS_ID
 #O2D_NUMBER
 #ROLE_ID (Secret)
@@ -70,7 +69,6 @@ stages:
                   echo "##vso[task.setvariable variable=awsSessionToken;isOutput=true;isSecret=true]$AWS_SESSION_TOKEN"
                 fi
             env:
-              APP_NAME: $(APP_NAME)
               AWS_ID: $(AWS_ID)
               O2D_NUMBER: $(O2D_NUMBER)
               ROLE_ID: $(ROLE_ID)
@@ -184,10 +182,11 @@ stages:
 
               echo "Build website"
               yarn build
-
+          - displayName: Build website
+          - script: |
               echo "Deploying to s3 bucket ${websiteBucketName}"
               aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
-            displayName: Install build and deploy
+            displayName: Deploy to s3 bucket
             env:
               AWS_DEFAULT_REGION: $(region)
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
