@@ -169,7 +169,7 @@ stages:
               git clone --single-branch --branch ${{ variables.appBranch }} ${{ variables.appRepo }}
             displayName: Fetch app repo
           - script: |
-              cd ${{ repoName }}
+              cd ${{ variables.repoName }}
               echo "Yarn install"
               yarn install
 
@@ -184,7 +184,7 @@ stages:
             displayName: Install AWS CLI v2
           - script: |
               echo "Deploying to s3 bucket ${websiteBucketName}"
-              cd ${{ repoName }}
+              cd ${{ variables.repoName }}
               yarn deploy
             displayName: Deploying to s3 bucket
             env:
