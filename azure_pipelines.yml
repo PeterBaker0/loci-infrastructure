@@ -119,8 +119,8 @@ stages:
             inputs:
               targetType: inline
               script: |
-                tags=$(git tag --sort=-creatordate)
-                current_tag=$tags[0]
+                echo "Retrieving current tag."
+                current_tag=$(git tag --sort=-creatordate | awk -F " " '{if (NR == 1) print $1}')
                 echo "Current tag: ${current_tag}"
                 echo "##vso[task.setvariable variable=gitTag;isOutput=true]$current_tag"
 
