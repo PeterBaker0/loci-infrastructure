@@ -109,6 +109,10 @@ stages:
     displayName: Deploy API Infrastructure
     jobs:
       - job: deployApp
+        variables:
+          awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
+          awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
+          awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -138,6 +142,10 @@ stages:
               source .venv/bin/activate 
               cdk deploy 
             displayName: CDK Deploy
+            env:
+              AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
+              AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
+              AWS_SESSION_TOKEN: $(awsSessionToken)
 
   - stage: cleanUpCredentialsLease
     displayName: Clean Up Credentials Lease
