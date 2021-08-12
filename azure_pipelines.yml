@@ -175,25 +175,22 @@ stages:
             displayName: Fetch app repo
           - script: |
               cd ${{ variables.repoName }}
+
               echo "Yarn install"
               yarn install
 
               echo "Build website"
               yarn build
-            displayName: Yarn install and website build
-          - script: |
+
               echo "Installing AWS CLI v2"
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
               sudo ./aws/install --update
-            displayName: Install AWS CLI v2
-          - script: |
+
               echo "Deploying to s3 bucket ${websiteBucketName}"
-              echo "cd ${{ variables.repoName }}"
-              cd ${{ variables.repoName }}
-              echo "aws s3 sync build/ s3://${{ variables.websiteBucketName }} --acl public-read"
-              aws s3 sync build/ s3://${{ variables.websiteBucketName }} --acl public-read
-            displayName: Deploying to s3 bucket
+              echo "aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read"
+              aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
+            displayName: Install build and deploy
             env:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
