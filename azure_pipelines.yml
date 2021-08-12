@@ -140,7 +140,7 @@ stages:
               echo "Running CDK Deploy"
               cd time_api_infrastructure
               source .venv/bin/activate 
-              cdk deploy 
+              cdk deploy --require-approval never
             displayName: CDK Deploy
             env:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
