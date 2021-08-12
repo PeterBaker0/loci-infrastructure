@@ -104,8 +104,40 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
-  #  - stage: DeployAPIInfrastructure
-  #    displayName: Deploy API Infrastructure
+# Deploy CDK Application
+  - stage: deployAPIInfrastructure
+    displayName: Deploy API Infrastructure
+    jobs:
+      - job: deployApp
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '10.x'
+            displayName: 'Install Node.js'
+          - script: |
+              echo "Installing aws-cdk"
+              sudo npm install -g aws-cdk 
+
+              echo "Creating virtual environment"
+              sudo apt-get install python3-venv 
+
+              echo "Moving to app folder"
+              cd time_api_infrastructure
+
+              python3 -m venv .venv 
+              source .venv/bin/activate 
+
+              echo "Installing python requirements"
+              pip install -r requirements.txt 
+            displayName: Setup environment
+          - script: | 
+              echo "Running CDK Deploy"
+              cd time_api_infrastructure
+              source .venv/bin/activate 
+              cdk deploy 
+            displayName: CDK Deploy
 
   - stage: cleanUpCredentialsLease
     displayName: Clean Up Credentials Lease
