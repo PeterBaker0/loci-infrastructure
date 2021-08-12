@@ -13,7 +13,7 @@ trigger:
 #VAULT_ADDR
 
 stages:
-  - stage: Retrieve_AWS_Creds
+  - stage: RetrieveAWSCreds
     displayName: Retrieve AWS Credentials
     jobs:
       # Get AWS creds from Hashicorp Vault
@@ -104,20 +104,18 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
-  #  - stage: Deploy_API_Infrastructure
+  #  - stage: DeployAPIInfrastructure
   #    displayName: Deploy API Infrastructure
 
-  - stage: Clean_Up_Credentials_Lease
+  - stage: CleanUpCredentialsLease
     displayName: Clean Up Credentials Lease
     jobs:
       - job: revokeVaultLease
         condition: always() # this job will always run, even if the pipeline is canceled
         displayName: Revoke the AWS credentials Vault lease
-        dependsOn:
-          - processVault
         variables:
-          VAULT_TOKEN: $[ dependencies.processVault.outputs['generateAWScreds.vaultToken'] ]
-          VAULT_AWS_LEASE_ID: $[ dependencies.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
+          VAULT_TOKEN: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWScreds.vaultToken'] ]
+          VAULT_AWS_LEASE_ID: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
         steps:
           - task: Bash@3
             name: vaultClientInstaller
