@@ -18,16 +18,16 @@ stages:
               targetType: inline
               script: |
                 echo Downloading Vault archive and checksum
-                curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_linux_amd64.zip \
-                  -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
-                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_SHA256SUMS \
-                  | grep vault_$(VAULT_VERSION)_linux_amd64.zip)
-                LOCAL_SHA=$(sha256sum vault_$(VAULT_VERSION)_linux_amd64.zip)
+                curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
+                  -o ./vault_${VAULT_VERSION}_linux_amd64.zip
+                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS \
+                  | grep vault_${VAULT_VERSION}_linux_amd64.zip)
+                LOCAL_SHA=$(sha256sum vault_${VAULT_VERSION}_linux_amd64.zip)
                 echo "Remote file SHA is: $REMOTE_SHA"
                 echo "Local file SHA is: $LOCAL_SHA"
                 if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
                 then
-                  unzip -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
+                  unzip -o ./vault_${VAULT_VERSION}_linux_amd64.zip
                   chmod +x ./vault
                 else
                   echo "##[error] Checksums do not match!"
