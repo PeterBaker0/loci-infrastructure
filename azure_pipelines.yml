@@ -104,8 +104,8 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
-  - stage: Deploy_API_Infrastructure
-    displayName: Deploy API Infrastructure
+  #  - stage: Deploy_API_Infrastructure
+  #    displayName: Deploy API Infrastructure
 
   - stage: Clean_Up_Credentials_Lease
     displayName: Clean Up Credentials Lease
