@@ -1,7 +1,3 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
 name: LOCI Time Demo API Pipeline
 
 trigger:
@@ -11,6 +7,7 @@ stages:
   - stage: Deploy API Infrastructure
     displayName: Deploy API Infrastructure
     jobs:
+      # Get AWS creds from Hashicorp Vault
       - job: processVault
         displayName: Get AWS credentials from Vault
         steps:
@@ -43,22 +40,12 @@ stages:
               targetType: inline
               script: |
                 echo 'login to vault'
-                VAULT_TOKEN=$(./vault write -format=json $(vaultAuthPath)/login role_id=$(vaultRoleId) secret_id=$(vaultSecretId) \
+                VAULT_TOKEN=$(./vault write -format=json auth/approle/acl_vlt_${O2D_NUMBER}/login role_id=${ROLE_ID} secret_id=${SECRET_ID} \
                   | jq -r '.auth.client_token')
                 ./vault login -no-print $VAULT_TOKEN
-                # Add the 'OrganizationAccountAccessRole' for the account to Vault, to allow cross-account access.
-                ROLE_ARNS=$(./vault read $(vaultSecretPath)/$(vaultAwsEngine)/roles/$(vaultCrossAccountRole) -format=json \
-                  | jq '.data.role_arns' | tr -d '[:space:][]"')
-                if [[ ! $ROLE_ARNS =~ ${{ parameters.accountId }} ]]
-                then
-                  echo "Add 'OrganizationAccountAccessRole' for account ${{ parameters.accountId }} to Vault."
-                  ./vault write $(vaultSecretPath)/$(vaultAwsEngine)/roles/$(vaultCrossAccountRole) \
-                    role_arns=$ROLE_ARNS,arn:aws:iam::${{ parameters.accountId }}:role/OrganizationAccountAccessRole
-                fi
-                # Set variables for assumed AWS credentials using the 'OrganizationAccountAccessRole' for the account.
-                VAULT_AWS_CREDS=$(./vault read $(vaultSecretPath)/$(vaultAwsEngine)/sts/$(vaultCrossAccountRole) \
-                  role_arn=arn:aws:iam::${{ parameters.accountId }}:role/OrganizationAccountAccessRole \
-                  -format=json)
+                echo 'Generate credentials with token'
+                VAULT_AWS_CREDS=$(vault read acl_vlt_${O2D_NUMBER}/${AWS_ID}/aws-engine/creds/${USER_ROLE_NAME} -format=json)
+                echo 'Keys retrieved'
                 AWS_ACCESS_KEY_ID=$(echo $VAULT_AWS_CREDS | jq -r .data.access_key)
                 AWS_SECRET_ACCESS_KEY=$(echo $VAULT_AWS_CREDS | jq -r .data.secret_key)
                 AWS_SESSION_TOKEN=$(echo $VAULT_AWS_CREDS | jq -r .data.security_token)
@@ -71,6 +58,15 @@ stages:
                 then
                   echo "##vso[task.setvariable variable=awsSessionToken;isOutput=true;isSecret=true]$AWS_SESSION_TOKEN"
                 fi
+            env:
+              APP_NAME: $(APP_NAME)
+              AWS_ID: $(AWS_ID)
+              O2D_NUMBER: $(O2D_NUMBER)
+              ROLE_ID: $(ROLE_ID)
+              SECRET_ID: $(SECRET_ID)
+              USER_ROLE_NAME: $(USER_ROLE_NAME)
+              VAULT_ADDR: $(VAULT_ADDR)
+
       # Test AWS credentials from Vault
       - job: testCreds
         displayName: DEBUG - Test AWS credentials retrieved from Vault
@@ -97,8 +93,6 @@ stages:
                 env | grep AWS
                 aws sts get-caller-identity
                 aws s3 ls
-
-# Get AWS creds from Hashicorp Vault
 
 # Setup CDK environment by building AWS CLI and CDK
 
