@@ -46,7 +46,7 @@ stages:
                   | jq -r '.auth.client_token')
                 ./vault login -no-print $VAULT_TOKEN
                 echo 'Generate credentials with token'
-                VAULT_AWS_CREDS=$(vault read acl_vlt_${O2D_NUMBER}/${AWS_ID}/aws-engine/creds/${USER_ROLE_NAME} -format=json)
+                VAULT_AWS_CREDS=$(./vault read acl_vlt_${O2D_NUMBER}/${AWS_ID}/aws-engine/creds/${USER_ROLE_NAME} -format=json)
                 echo 'Keys retrieved'
                 AWS_ACCESS_KEY_ID=$(echo $VAULT_AWS_CREDS | jq -r .data.access_key)
                 AWS_SECRET_ACCESS_KEY=$(echo $VAULT_AWS_CREDS | jq -r .data.secret_key)
