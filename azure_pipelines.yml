@@ -147,45 +147,46 @@ stages:
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
 
-  - stage: cleanUpCredentialsLease
-    displayName: Clean Up Credentials Lease
-    jobs:
-      - job: revokeVaultLease
-        condition: always() # this job will always run, even if the pipeline is canceled
-        displayName: Revoke the AWS credentials Vault lease
-        variables:
-          VAULT_TOKEN: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultToken'] ]
-          VAULT_AWS_LEASE_ID: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultAwsLeaseId'] ]
-        steps:
-          - task: Bash@3
-            name: vaultClientInstaller
-            displayName: Vault client installer
-            inputs:
-              targetType: inline
-              script: |
-                curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
-                  -o ./vault_${VAULT_VERSION}_linux_amd64.zip
-                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS \
-                  | grep vault_${VAULT_VERSION}_linux_amd64.zip)
-                LOCAL_SHA=$(sha256sum vault_${VAULT_VERSION}_linux_amd64.zip)
-                echo "Remote file SHA is: $REMOTE_SHA"
-                echo "Local file SHA is: $LOCAL_SHA"
-                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
-                then
-                  unzip -o ./vault_${VAULT_VERSION}_linux_amd64.zip
-                  chmod +x ./vault
-                else
-                  echo "##[error] Checksums do not match!"
-                  exit 1
-                fi
-          - task: Bash@3
-            name: revokeVaultLeases
-            displayName: Revoke Vault leases
-            continueOnError: true # lease has a limited TTL so will eventually expire
-            inputs:
-              targetType: inline
-              script: |
-                echo 'login to vault'
-                ./vault login -no-print $(VAULT_TOKEN)
-                echo 'revoke lease'
-                ./vault lease revoke $(VAULT_AWS_LEASE_ID)
+#  - stage: cleanUpCredentialsLease
+#    displayName: Clean Up Credentials Lease
+#    jobs:
+#      - job: revokeVaultLease
+#        condition: always() # this job will always run, even if the pipeline is canceled
+#        displayName: Revoke the AWS credentials Vault lease
+#        variables:
+#          VAULT_TOKEN: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultToken'] ]
+#          VAULT_AWS_LEASE_ID: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.vaultAwsLeaseId'] ]
+#        steps:
+#          - task: Bash@3
+#            name: vaultClientInstaller
+#            displayName: Vault client installer
+#            inputs:
+#              targetType: inline
+#              script: |
+#                curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
+#                  -o ./vault_${VAULT_VERSION}_linux_amd64.zip
+#                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS \
+#                  | grep vault_${VAULT_VERSION}_linux_amd64.zip)
+#                LOCAL_SHA=$(sha256sum vault_${VAULT_VERSION}_linux_amd64.zip)
+#                echo "Remote file SHA is: $REMOTE_SHA"
+#                echo "Local file SHA is: $LOCAL_SHA"
+#                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
+#                then
+#                  unzip -o ./vault_${VAULT_VERSION}_linux_amd64.zip
+#                  chmod +x ./vault
+#                else
+#                  echo "##[error] Checksums do not match!"
+#                  exit 1
+#                fi
+#          - task: Bash@3
+#            name: revokeVaultLeases
+#            displayName: Revoke Vault leases
+#            continueOnError: true # lease has a limited TTL so will eventually expire
+#            inputs:
+#              targetType: inline
+#              script: |
+#                echo 'login to vault'
+#                ./vault login -no-print $(VAULT_TOKEN)
+#                echo 'revoke lease'
+#                ./vault lease revoke $(VAULT_AWS_LEASE_ID)
+#
