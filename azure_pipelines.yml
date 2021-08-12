@@ -3,8 +3,8 @@ name: LOCI Time Demo Deployment Pipeline
 trigger:
   tags:
     include:
-      - BUILD
-      - DESTROY
+      - BUILD*
+      - DESTROY*
 
 # Variables from Pipeline
 #AWS_ID
@@ -105,9 +105,26 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
+  # Get the git tag which triggered build
+  - stage: retrieveGitTag
+    displayName: Retrieve Git Tag
+    jobs: 
+      - job: retrieveTag 
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - task: Bash@3
+            name: gitDescribeTask
+            displayName: Retrieve Git Tag 
+            inputs:
+              targetType: inline
+                tag=$(git describe --exact-match $(BUILD.SourceVersion))
+                echo "##vso[task.setvariable variable=gitTag;isOutput=true]$tag"
+
   # Deploy CDK Application
   - stage: deployAPIInfrastructure
     displayName: Deploy API Infrastructure
+    condition: and(succeeded(), eq($[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ],'BUILD'))
     jobs:
       - job: deployApp
         variables:
@@ -196,6 +213,53 @@ stages:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
+
+  # Destroy CDK Application
+  - stage: destroyAPIInfrastructure
+    displayName: Tear Down API Infrastructure
+    condition: and(succeeded(), eq($[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ],'DESTROY'))
+    jobs:
+      - job: destroyApp
+        variables:
+          awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
+          awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
+          awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
+          region: ap-southeast-2
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "10.x"
+            displayName: "Install Node.js"
+          - script: |
+              echo "Installing aws-cdk"
+              sudo npm install -g aws-cdk 
+
+              echo "Creating virtual environment"
+              sudo apt-get install python3-venv 
+
+              echo "Moving to app folder"
+              cd time_api_infrastructure
+
+              python3 -m venv .venv 
+              source .venv/bin/activate 
+
+              echo "Installing python requirements"
+              pip install -r requirements.txt
+            displayName: Setup environment
+          - script: |
+              echo "Running CDK Deploy"
+              cd time_api_infrastructure
+              source .venv/bin/activate 
+              echo "Destroying infrastructure!"
+              yes | cdk destroy --require-approval never
+            displayName: CDK Destroy
+            env:
+              AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
+              AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
+              AWS_SESSION_TOKEN: $(awsSessionToken)
+              AWS_DEFAULT_REGION: $(region)
 #  - stage: cleanUpCredentialsLease
 #    displayName: Clean Up Credentials Lease
 #    jobs:
