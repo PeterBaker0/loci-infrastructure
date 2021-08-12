@@ -1,11 +1,11 @@
 name: LOCI Time Demo Deployment Pipeline
 
 trigger:
-  - branches:
-      include:
-        - time_api_deployment
-      tags:
-        - BUILD
+  branches:
+    include:
+      - time_api_deployment
+    tags:
+      - BUILD
 
 # Variables from Pipeline
 #AWS_ID
