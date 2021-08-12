@@ -104,7 +104,7 @@ stages:
                 aws sts get-caller-identity
                 aws s3 ls
 
-# Deploy CDK Application
+  # Deploy CDK Application
   - stage: deployAPIInfrastructure
     displayName: Deploy API Infrastructure
     jobs:
@@ -114,12 +114,12 @@ stages:
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
           awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: "ubuntu-latest"
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: '10.x'
-            displayName: 'Install Node.js'
+              versionSpec: "10.x"
+            displayName: "Install Node.js"
           - script: |
               echo "Installing aws-cdk"
               sudo npm install -g aws-cdk 
@@ -134,9 +134,9 @@ stages:
               source .venv/bin/activate 
 
               echo "Installing python requirements"
-              pip install -r requirements.txt 
+              pip install -r requirements.txt
             displayName: Setup environment
-          - script: | 
+          - script: |
               echo "Running CDK Deploy"
               cd time_api_infrastructure
               source .venv/bin/activate 
@@ -147,7 +147,7 @@ stages:
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
       - job: deployStaticWebsite
-        dependsOn: 
+        dependsOn:
           - deployApp
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
@@ -158,12 +158,12 @@ stages:
           repoName: loci-integration-app
           websiteBucketName: timedemo.lab.loci.cat
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: "ubuntu-latest"
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: '10.x'
-            displayName: 'Install Node.js'
+              versionSpec: "10.x"
+            displayName: "Install Node.js"
           - script: |
               echo "Installing yarn"
               sudo npm install -g yarn
@@ -181,22 +181,23 @@ stages:
               echo "Build website"
               yarn build
             displayName: Yarn install and website build
-          - script: | 
+          - script: |
               echo "Installing AWS CLI v2"
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
               sudo ./aws/install --update
             displayName: Install AWS CLI v2
-          - script: | 
+          - script: |
               echo "Deploying to s3 bucket ${websiteBucketName}"
+              echo "cd ${{ variables.repoName }}"
               cd ${{ variables.repoName }}
+              echo "aws s3 sync build/ s3://${{ variables.websiteBucketName }} --acl public-read"
               aws s3 sync build/ s3://${{ variables.websiteBucketName }} --acl public-read
             displayName: Deploying to s3 bucket
             env:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
-
 #  - stage: cleanUpCredentialsLease
 #    displayName: Clean Up Credentials Lease
 #    jobs:
