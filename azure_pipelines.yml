@@ -126,10 +126,10 @@ stages:
 
   # Deploy CDK Application
   - stage: deployAPIInfrastructure
-    variables:            
+    variables:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     displayName: Deploy API Infrastructure
-    condition: and(succeeded(), startsWith($(gitTag),'BUILD'))
+    condition: and(succeeded(), startsWith(variables['gitTag'],'BUILD'))
     jobs:
       - job: deployApp
         variables:
@@ -222,9 +222,9 @@ stages:
   # Destroy CDK Application
   - stage: destroyAPIInfrastructure
     displayName: Tear Down API Infrastructure
-    variables:            
+    variables:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
-    condition: and(succeeded(), startsWith($(gitTag),'DESTROY'))
+    condition: and(succeeded(), startsWith(variables['gitTag'],'DESTROY'))
     jobs:
       - job: destroyApp
         variables:
