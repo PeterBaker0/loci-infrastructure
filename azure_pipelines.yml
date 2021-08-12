@@ -1,0 +1,146 @@
+name: LOCI Time Demo API Pipeline
+
+trigger:
+  - time_api_deployment
+
+stages:
+  - stage: Deploy API Infrastructure
+    displayName: Deploy API Infrastructure
+    jobs:
+      # Get AWS creds from Hashicorp Vault
+      - job: processVault
+        displayName: Get AWS credentials from Vault
+        steps:
+          - task: Bash@3
+            name: vaultClientInstaller
+            displayName: Vault client installer
+            inputs:
+              targetType: inline
+              script: |
+                echo Downloading Vault archive and checksum
+                curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_linux_amd64.zip \
+                  -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
+                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_SHA256SUMS \
+                  | grep vault_$(VAULT_VERSION)_linux_amd64.zip)
+                LOCAL_SHA=$(sha256sum vault_$(VAULT_VERSION)_linux_amd64.zip)
+                echo "Remote file SHA is: $REMOTE_SHA"
+                echo "Local file SHA is: $LOCAL_SHA"
+                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
+                then
+                  unzip -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
+                  chmod +x ./vault
+                else
+                  echo "##[error] Checksums do not match!"
+                  exit 1
+                fi
+          - task: Bash@3
+            name: generateAWScreds
+            displayName: Generate AWS cross-account credentials
+            inputs:
+              targetType: inline
+              script: |
+                echo 'login to vault'
+                VAULT_TOKEN=$(./vault write -format=json auth/approle/acl_vlt_${O2D_NUMBER}/login role_id=${ROLE_ID} secret_id=${SECRET_ID} \
+                  | jq -r '.auth.client_token')
+                ./vault login -no-print $VAULT_TOKEN
+                echo 'Generate credentials with token'
+                VAULT_AWS_CREDS=$(vault read acl_vlt_${O2D_NUMBER}/${AWS_ID}/aws-engine/creds/${USER_ROLE_NAME} -format=json)
+                echo 'Keys retrieved'
+                AWS_ACCESS_KEY_ID=$(echo $VAULT_AWS_CREDS | jq -r .data.access_key)
+                AWS_SECRET_ACCESS_KEY=$(echo $VAULT_AWS_CREDS | jq -r .data.secret_key)
+                AWS_SESSION_TOKEN=$(echo $VAULT_AWS_CREDS | jq -r .data.security_token)
+                # Setup environment variables for remaining tasks
+                echo "##vso[task.setvariable variable=vaultToken;isOutput=true;isSecret=true]$VAULT_TOKEN"
+                echo "##vso[task.setvariable variable=vaultAwsLeaseId;isOutput=true;isSecret=true]$(echo $VAULT_AWS_CREDS | jq -r .lease_id)"
+                echo "##vso[task.setvariable variable=awsAccessKeyId;isOutput=true;isSecret=true]$AWS_ACCESS_KEY_ID"
+                echo "##vso[task.setvariable variable=awsSecretAccessKey;isOutput=true;isSecret=true]$AWS_SECRET_ACCESS_KEY"
+                if [[ $AWS_SESSION_TOKEN && $AWS_SESSION_TOKEN != 'null' ]]
+                then
+                  echo "##vso[task.setvariable variable=awsSessionToken;isOutput=true;isSecret=true]$AWS_SESSION_TOKEN"
+                fi
+            env:
+              APP_NAME: $(APP_NAME)
+              AWS_ID: $(AWS_ID)
+              O2D_NUMBER: $(O2D_NUMBER)
+              ROLE_ID: $(ROLE_ID)
+              SECRET_ID: $(SECRET_ID)
+              USER_ROLE_NAME: $(USER_ROLE_NAME)
+              VAULT_ADDR: $(VAULT_ADDR)
+
+      # Test AWS credentials from Vault
+      - job: testCreds
+        displayName: DEBUG - Test AWS credentials retrieved from Vault
+        dependsOn:
+          - processVault
+        condition: ${{ parameters.debugRun }}
+        variables:
+          awsAccessKeyId: $[ dependencies.processVault.outputs['generateAWScreds.awsAccessKeyId'] ]
+          awsSecretAccessKey: $[ dependencies.processVault.outputs['generateAWScreds.awsSecretAccessKey'] ]
+          awsSessionToken: $[ dependencies.processVault.outputs['generateAWScreds.awsSessionToken'] ]
+        steps:
+          - task: Bash@3
+            name: testAWScredsPass
+            displayName: Test AWS credentials passing between tasks
+            env:
+              AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
+              AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
+              AWS_SESSION_TOKEN: $(awsSessionToken)
+            continueOnError: true
+            inputs:
+              targetType: inline
+              script: |
+                # Validate account credentials are present
+                env | grep AWS
+                aws sts get-caller-identity
+                aws s3 ls
+
+# Setup CDK environment by building AWS CLI and CDK
+
+# Deploy using established environment and credentials
+
+# Extract targets from the build outputs of the CDK build
+
+# Download source from other github repo and deploy static website code to
+# bucket target
+#- job: revokeVaultLease
+#        condition: always() # this job will always run, even if the pipeline is canceled
+#        displayName: Revoke the AWS credentials Vault lease
+#        dependsOn:
+#          - processVault
+#          - processTerraform
+#        variables:
+#          VAULT_TOKEN: $[ dependencies.processVault.outputs['generateAWScreds.vaultToken'] ]
+#          VAULT_AWS_LEASE_ID: $[ dependencies.processVault.outputs['generateAWScreds.vaultAwsLeaseId'] ]
+#        steps:
+#          - task: Bash@3
+#            name: vaultClientInstaller
+#            displayName: Vault client installer
+#            inputs:
+#              targetType: inline
+#              script: |
+#                curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_linux_amd64.zip \
+#                  -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
+#                REMOTE_SHA=$(curl -fsSL https://releases.hashicorp.com/vault/$(VAULT_VERSION)/vault_$(VAULT_VERSION)_SHA256SUMS \
+#                  | grep vault_$(VAULT_VERSION)_linux_amd64.zip)
+#                LOCAL_SHA=$(sha256sum vault_$(VAULT_VERSION)_linux_amd64.zip)
+#                echo "Remote file SHA is: $REMOTE_SHA"
+#                echo "Local file SHA is: $LOCAL_SHA"
+#                if [[ "$REMOTE_SHA" == "$LOCAL_SHA" ]]
+#                then
+#                  unzip -o ./vault_$(VAULT_VERSION)_linux_amd64.zip
+#                  chmod +x ./vault
+#                else
+#                  echo "##[error] Checksums do not match!"
+#                  exit 1
+#                fi
+#          - task: Bash@3
+#            name: revokeVaultLeases
+#            displayName: Revoke Vault leases
+#            continueOnError: true # lease has a limited TTL so will eventually expire
+#            inputs:
+#              targetType: inline
+#              script: |
+#                echo 'login to vault'
+#                ./vault login -no-print $(VAULT_TOKEN)
+#                echo 'revoke lease'
+#                ./vault lease revoke $(VAULT_AWS_LEASE_ID)
