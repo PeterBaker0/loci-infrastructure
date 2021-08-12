@@ -4,7 +4,7 @@ trigger:
   - time_api_deployment
 
 stages:
-  - stage: Deploy API Infrastructure
+  - stage: Deploy_API_Infrastructure
     displayName: Deploy API Infrastructure
     jobs:
       # Get AWS creds from Hashicorp Vault
