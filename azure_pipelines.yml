@@ -184,6 +184,7 @@ stages:
               yarn build
             displayName: Build website
           - script: |
+              cd ${{ variables.repoName }}
               echo "Deploying to s3 bucket ${websiteBucketName}"
               aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
             displayName: Deploy to s3 bucket
