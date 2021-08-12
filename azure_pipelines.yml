@@ -113,6 +113,7 @@ stages:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
           awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
+          region: ap-southeast-2
         pool:
           vmImage: "ubuntu-latest"
         steps:
@@ -146,6 +147,7 @@ stages:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
+              AWS_REGION: $(region)
       - job: deployStaticWebsite
         dependsOn:
           - deployApp
@@ -157,6 +159,7 @@ stages:
           appBranch: timedemo
           repoName: loci-integration-app
           websiteBucketName: timedemo.lab.loci.cat
+          region: ap-southeast-2
         pool:
           vmImage: "ubuntu-latest"
         steps:
@@ -183,10 +186,10 @@ stages:
               yarn build
 
               echo "Deploying to s3 bucket ${websiteBucketName}"
-              echo "aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read"
               aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
             displayName: Install build and deploy
             env:
+              AWS_REGION: $(region)
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
