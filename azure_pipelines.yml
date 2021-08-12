@@ -147,7 +147,7 @@ stages:
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
-              AWS_REGION: $(region)
+              AWS_DEFAULT_REGION: $(region)
       - job: deployStaticWebsite
         dependsOn:
           - deployApp
@@ -189,7 +189,7 @@ stages:
               aws s3 sync ./build/ s3://${{ variables.websiteBucketName }} --acl public-read
             displayName: Install build and deploy
             env:
-              AWS_REGION: $(region)
+              AWS_DEFAULT_REGION: $(region)
               AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
