@@ -42,7 +42,7 @@ stages:
               targetType: inline
               script: |
                 echo 'login to vault'
-                VAULT_TOKEN=$(./vault write -format=json auth/approle/acl_vlt_${O2D_NUMBER}/login role_id=$ROLE_ID secret_id=$SECRET_ID \
+                VAULT_TOKEN=$(./vault write -format=json auth/approle/acl_vlt_${O2D_NUMBER}/login role_id=$(ROLE_ID) secret_id=$(SECRET_ID) \
                   | jq -r '.auth.client_token')
                 ./vault login -no-print $VAULT_TOKEN
                 echo 'Generate credentials with token'
