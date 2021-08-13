@@ -124,6 +124,39 @@ stages:
                 echo "Current tag: ${current_tag}"
                 echo "##vso[task.setvariable variable=gitTag;isOutput=true]$current_tag"
 
+  # Testing
+  - stage: testTagStage
+    displayName: Testing tag
+    variables:
+      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
+    jobs:
+      - job: displayTagVariable
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - script: |
+              echo "echo ${gitTag}"
+              echo ${gitTag}
+              echo "echo $(gitTag)"
+              echo $(gitTag)
+              echo "echo $gitTag"
+              echo $gitTag
+      - job: conditionalJobSquare
+        pool:
+          vmImage: "ubuntu-latest"
+        condition: and(succeeded(), startsWith(variables['gitTag'],'BUILD'))
+        steps:
+          - script: |
+              echo "Seems to have detected a build tag using the square brackets."
+        displayName: square bracket conditional
+      - job: conditionalJobDot
+        pool:
+          vmImage: "ubuntu-latest"
+        condition: and(succeeded(), startsWith(variables.gitTag,'BUILD'))
+        steps:
+          - script: |
+              echo "Seems to have detected a build tag using the dot format."
+        displayName: square bracket dot
   # Deploy CDK Application
   - stage: deployAPIInfrastructure
     variables:
@@ -267,39 +300,6 @@ stages:
               AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
               AWS_SESSION_TOKEN: $(awsSessionToken)
               AWS_DEFAULT_REGION: $(region)
-  # Testing
-  - stage: testTagStage
-    displayName: Testing tag
-    variables:
-      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
-    jobs:
-      - job: displayTagVariable
-        pool:
-          vmImage: "ubuntu-latest"
-        steps:
-          - script: |
-              echo "echo ${gitTag}"
-              echo ${gitTag}
-              echo "echo $(gitTag)"
-              echo $(gitTag)
-              echo "echo $gitTag"
-              echo $gitTag
-      - job: conditionalJobSquare
-        pool:
-          vmImage: "ubuntu-latest"
-        condition: and(succeeded(), startsWith(variables['gitTag'],'BUILD'))
-        steps:
-          - script: |
-              echo "Seems to have detected a build tag using the square brackets."
-        displayName: square bracket conditional
-      - job: conditionalJobDot
-        pool:
-          vmImage: "ubuntu-latest"
-        condition: and(succeeded(), startsWith(variables.gitTag,'BUILD'))
-        steps:
-          - script: |
-              echo "Seems to have detected a build tag using the dot format."
-        displayName: square bracket dot
 #  - stage: cleanUpCredentialsLease
 #    displayName: Clean Up Credentials Lease
 #    jobs:
