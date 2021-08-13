@@ -134,7 +134,7 @@ stages:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     jobs:
       - job: deployApp
-        condition: startsWith(variables.gitTag,'BUILD')
+        condition: startsWith(variables.gitTag,'time-demo/BUILD')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
@@ -232,7 +232,7 @@ stages:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     jobs:
       - job: destroyApp
-        condition: startsWith(variables.gitTag,'DESTROY')
+        condition: startsWith(variables.gitTag,'time-demo/DESTROY')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
