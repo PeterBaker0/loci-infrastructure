@@ -124,40 +124,6 @@ stages:
                 echo "Current tag: ${current_tag}"
                 echo "##vso[task.setvariable variable=gitTag;isOutput=true]$current_tag"
 
-  # Testing
-  - stage: testTagStage
-    displayName: Testing tag
-    variables:
-      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
-    jobs:
-      - job: displayTagVariable
-        pool:
-          vmImage: "ubuntu-latest"
-        steps:
-          - script: |
-              echo "echo ${gitTag}"
-              echo ${gitTag}
-              echo "echo $(gitTag)"
-              echo $(gitTag)
-              echo "echo $gitTag"
-              echo $gitTag
-      - job: conditionalJobSquare
-        pool:
-          vmImage: "ubuntu-latest"
-        condition: and(succeeded(), startsWith(variables['gitTag'],'BUILD'))
-        steps:
-          - script: |
-              echo "Seems to have detected a build tag using the square brackets."
-        displayName: square bracket conditional
-      - job: conditionalJobDot
-        pool:
-          vmImage: "ubuntu-latest"
-        condition: and(succeeded(), startsWith(variables.gitTag,'BUILD'))
-        steps:
-          - script: |
-              echo "Seems to have detected a build tag using the dot format."
-        displayName: square bracket dot
-
   # Deploy CDK Application
   - stage: infrastructureAction
     variables:
@@ -165,10 +131,10 @@ stages:
     dependsOn:
       - retrieveAWSCreds
       - retrieveGitTag
+    condition: startsWith(variables.gitTag,'BUILD')
     displayName: Deploy API Infrastructure
     jobs:
       - job: deployApp
-        condition: startsWith(variables.gitTag,'BUILD')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
@@ -264,9 +230,9 @@ stages:
     dependsOn:
       - retrieveAWSCreds
       - retrieveGitTag
+    condition: startsWith(variables.gitTag,'DESTROY')
     jobs:
       - job: destroyApp
-        condition: startsWith(variables.gitTag,'DESTROY')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
