@@ -125,16 +125,16 @@ stages:
                 echo "##vso[task.setvariable variable=gitTag;isOutput=true]$current_tag"
 
   # Deploy CDK Application
-  - stage: infrastructureAction
-    variables:
-      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
+  - stage: deployAPIInfrastructure
+    displayName: Deploy API Infrastructure
     dependsOn:
       - retrieveAWSCreds
       - retrieveGitTag
-    condition: startsWith(variables.gitTag,'BUILD')
-    displayName: Deploy API Infrastructure
+    variables:
+      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     jobs:
       - job: deployApp
+        condition: startsWith(variables.gitTag,'BUILD')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
@@ -225,14 +225,14 @@ stages:
   # Destroy CDK Application
   - stage: destroyAPIInfrastructure
     displayName: Tear Down API Infrastructure
-    variables:
-      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     dependsOn:
       - retrieveAWSCreds
       - retrieveGitTag
-    condition: startsWith(variables.gitTag,'DESTROY')
+    variables:
+      gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
     jobs:
       - job: destroyApp
+        condition: startsWith(variables.gitTag,'DESTROY')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
