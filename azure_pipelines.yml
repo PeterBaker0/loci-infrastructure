@@ -3,8 +3,8 @@ name: LOCI Time Demo Deployment Pipeline
 trigger:
   tags:
     include:
-      - BUILD*
-      - DESTROY*
+      - time-demo/BUILD*
+      - time-demo/DESTROY*
 
 # Variables from Pipeline
 #AWS_ID
