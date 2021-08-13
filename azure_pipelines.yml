@@ -157,14 +157,18 @@ stages:
           - script: |
               echo "Seems to have detected a build tag using the dot format."
         displayName: square bracket dot
+
   # Deploy CDK Application
-  - stage: deployAPIInfrastructure
+  - stage: infrastructureAction
     variables:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
+    dependsOn:
+      - retrieveAWSCreds
+      - retrieveGitTag
     displayName: Deploy API Infrastructure
-    condition: and(succeeded(), startsWith(variables['gitTag'],'BUILD'))
     jobs:
       - job: deployApp
+        condition: startsWith(variables.gitTag,'BUILD')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
@@ -257,9 +261,12 @@ stages:
     displayName: Tear Down API Infrastructure
     variables:
       gitTag: $[ stageDependencies.retrieveGitTag.retrieveTag.outputs['gitDescribeTask.gitTag'] ]
-    condition: and(succeeded(), startsWith(variables['gitTag'],'DESTROY'))
+    dependsOn:
+      - retrieveAWSCreds
+      - retrieveGitTag
     jobs:
       - job: destroyApp
+        condition: startsWith(variables.gitTag,'DESTROY')
         variables:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
