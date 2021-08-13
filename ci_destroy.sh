@@ -9,6 +9,6 @@ git commit --allow-empty -m "Azure CI Tear Down:${new_id}."
 git tag $destroy_prefix-${new_id}
 echo "Pushing tag and empty commit"
 git push --tag 
-git add version 
+git add action_id 
 git commit -m "Updating action id after tear down" 
 git push 
