@@ -1,3 +1,4 @@
+#!/bin/bash -e
 build_prefix=time-demo/BUILD
 echo "Incrementing action id"
 current_id=$(cat action_id)

@@ -1,3 +1,4 @@
+#!/bin/bash -e
 destroy_prefix=time-demo/DESTROY
 echo "Incrementing action id"
 current_id=$(cat action_id)
