@@ -181,7 +181,7 @@ stages:
           awsAccessKeyId: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsAccessKeyId'] ]
           awsSecretAccessKey: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSecretAccessKey'] ]
           awsSessionToken: $[ stageDependencies.retrieveAWSCreds.processVault.outputs['generateAWSCreds.awsSessionToken'] ]
-          appRepo: https://github.com/CSIRO-enviro-informatics/loci-integration-app
+          appRepo: https://github.com/PeterBaker0/loci-integration-app
           appBranch: timedemo
           repoName: loci-integration-app
           websiteBucketName: timedemo.lab.loci.cat
